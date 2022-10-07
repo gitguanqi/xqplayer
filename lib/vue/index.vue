@@ -404,6 +404,8 @@
                     poster,
                 });
 
+                myVideo.pause();
+
                 myVideo.oncontextmenu = function (e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -502,6 +504,7 @@
             // 隐藏画中画
             hideDraw() {
                 this.videoInfo.isDraw = false;
+                document.documentElement.scrollTop = 0;
             },
 
             // 添加歌曲音量控制事件
@@ -593,32 +596,11 @@
 
             // fullscreen set
             fullScreenOpen() {
-                let docElm = document.documentElement ||
-                document.documentElement.body;
-                if (docElm.requestFullscreen) {
-                    docElm.requestFullscreen();
-                } else if (docElm.msRequestFullscreen) {
-                    docElm.msRequestFullscreen();
-                } else if (docElm.mozRequestFullScreen) {
-                    docElm.mozRequestFullScreen();
-                } else if (docElm.webkitRequestFullScreen) {
-                    docElm.webkitRequestFullScreen();
-                }
                 this.videoInfo.scale = true;
                 document.body.className = 'hide';
             },
 
             fullScreenCancel() {
-                let docElm = document.documentElement;
-                if (docElm.exitFullscreen) {
-                    docElm.exitFullscreen();
-                } else if (docElm.msExitFullscreen) {
-                    docElm.msExitFullscreen();
-                } else if (docElm.mozCancelFullScreen) {
-                    docElm.mozCancelFullScreen();
-                } else if (docElm.webkitCancelFullScreen) {
-                    docElm.webkitCancelFullScreen();
-                }
                 this.videoInfo.scale = false;
                 document.body.className = '';
             },
@@ -716,6 +698,13 @@
     @nine: #999;
     @f8: #f8f8f8;
     @c: #ccc;
+    body {
+        .hide {
+            width: 100%;
+            height: 10vh;
+            overflow: hidden;
+        }
+    }
     .xqvideo-box {
         position: relative;
         .video-info-box {
@@ -897,6 +886,7 @@
                 color: @white;
                 font-size: 16px;
                 cursor: pointer;
+                z-index: 99;
             }
 
             .video-control {
