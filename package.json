@@ -1,0 +1,33 @@
+{
+    "name": "xqplayer",
+    "version": "0.0.1",
+    "description": "This is a simplify firendly video player.",
+    "main": "lib/vue/index.js",
+    "directories": {
+        "lib": "lib",
+        "test": "test"
+    },
+    "scripts": {
+        "test": "echo Error: no test specified && exit 1",
+        "test:browser": "live-server --host=localhost"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gitguanqi/xqplayer.git"
+    },
+    "keywords": [
+        "player",
+        "xqplayer"
+    ],
+    "author": "gitguanqi",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/gitguanqi/xqplayer/issues"
+    },
+    "homepage": "https://github.com/gitguanqi/xqplayer#readme",
+    "devDependencies": {
+        "less": "^4.1.3",
+        "less-loader": "^11.1.0",
+        "xqshare": "^0.0.5"
+    }
+}
