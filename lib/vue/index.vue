@@ -431,10 +431,17 @@
                 myVideo.addEventListener('timeupdate', () => {
                     let currentTime = 0;
                     currentTime = myVideo.currentTime;
-                    this.videoInfo.process = (currentTime / myVideo.duration) * 100;
-                    this.videoInfo.startTime = this.secondToTime(currentTime);
-                    this.videoInfo.endTime = this.secondToTime(myVideo.duration);
-                    this.videoInfo.about.duration = myVideo.duration;
+                    let total = myVideo.duration;
+                    if (currentTime) {
+                        this.videoInfo.startTime = this.secondToTime(currentTime);
+                    }
+                    if (total) {
+                        this.videoInfo.endTime = this.secondToTime(myVideo.duration);
+                        this.videoInfo.about.duration = myVideo.duration;
+                    }
+                    if (currentTime && total) {
+                        this.videoInfo.process = (currentTime / myVideo.duration) * 100;
+                    }
                 }, false);
                 myVideo.addEventListener('ended', () => {
                     if (this.videoInfo.replay) {
@@ -515,12 +522,14 @@
                 // 鼠标按下
                 volBar.addEventListener('mousedown', (e) => {
                     
-                    let volBox = document.querySelector('.video-control');
-                    let num = e.clientY - volBox.offsetTop;
+                    let videoBox = document.querySelector('.xqvideo-box').offsetTop;
+                    let volBox = document.querySelector('.video-control').offsetTop;
+                    let num = e.clientY - videoBox;
+                    num = (volBox - num) + 6;
                     let hei = e.target.clientHeight;
                     let vol = num / hei;
                     vol = vol > 1 ? 1 : vol < 0.1 ? 0.01 : vol;
-                    let volFin = 1 - vol;
+                    let volFin = vol;
                     this.videoInfo.vol = volFin * 100;
                     xqVideo.volume = volFin;
                     if (volFin <= 0) {
