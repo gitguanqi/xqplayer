@@ -1,6 +1,6 @@
 <template>
     <div class="xqvideo-box" :style="{'width': videoInfo.width+'px', 'height': videoInfo.height+'px'}">
-        <div :class="{'video-info-box': true, 'scale': videoInfo.scale, 'draw': videoInfo.isDraw} ">
+        <div :class="{'video-info-box': true, 'scale': videoInfo.scale, 'draw': videoInfo.isDraw} " @mouseover="toggleControl(true)"  @mouseout="toggleControl(false)">
             <video ref="video" tabindex="-1" id="myvideo" preload="auto" @click="playVideo"></video>
             <div :class="{'video-loading': true, 'video-loading-text': videoInfo.error}" v-if="videoInfo.loading">
                 <p v-if="videoInfo.error">
@@ -38,7 +38,7 @@
                         </li>
                     </ul>
                 </div>
-            <div class="video-control">
+            <div class="video-control" v-show="videoInfo.control">
                 <div ref="progressbar" class="video-control-bar">
                     <span :style="{'width': videoInfo.process+'%'}"></span>
                 </div>
@@ -464,6 +464,11 @@
 
                 // 进度条控制
                 this.addProgreeEvent();
+            },
+
+            // 控制条
+            toggleControl (type) {
+                this.videoInfo.control = type;
             },
 
             // 计算秒数
