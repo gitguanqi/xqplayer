@@ -13,8 +13,8 @@ This is a simplify firendly video player.
 <link rel="stylesheet" href="https://unpkg.com/xqshare/lib/css/xqshare.min.css">
 <link rel="stylesheet" href="https://unpkg.com/xqplayer/lib/css/xqplayer.min.css">
 <!-- cdn js -->
-<script src="https://cdn.guanqi.xyz/libs/flv.js/1.6.1/js/flv.min.js"></script>
-<script src="https://cdn.guanqi.xyz/libs/hls.js/1.0.8/js/hls.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.6.1/flv.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.0.8/hls.min.js"></script>
 <script src="https://unpkg.com/xqshare/lib/js/xqshare.min.js"></script>
 <script src="https://unpkg.com/xqplayer/lib/js/xqplayer.min.js"></script>
 ```
