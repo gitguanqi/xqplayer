@@ -10,13 +10,13 @@ This is a simplify firendly video player.
 
 ```html
 <!-- cdn css -->
-<link rel="stylesheet" href="https://unpkg.com/xqshare/lib/css/xqshare.min.css">
-<link rel="stylesheet" href="https://unpkg.com/xqplayer/lib/css/xqplayer.min.css">
+<link rel="stylesheet" href="https://xqgj.cc/xqcdn/libs/xqshare/css/xqshare.min.css">
+<link rel="stylesheet" href="https://xqgj.cc/xqcdn/libs/xqplayer/css/xqplayer.min.css">
 <!-- cdn js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.6.1/flv.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.0.8/hls.min.js"></script>
-<script src="https://unpkg.com/xqshare/lib/js/xqshare.min.js"></script>
-<script src="https://unpkg.com/xqplayer/lib/js/xqplayer.min.js"></script>
+<script src="https://xqgj.cc/xqcdn/libs/xqshare/js/xqshare.min.js"></script>
+<script src="https://xqgj.cc/xqcdn/libs/xqplayer/js/xqplayer.min.js"></script>
 ```
 
 ### use npm
@@ -141,9 +141,9 @@ export default {
 
 ### preview
 
-[demo](https://unpkg.com/xqplayer/test/browser.html)
+[demo](https://xqgj.cc/xqplayer/test/browser.html)
 
-![preview](https://unpkg.com/xqplayer/test/data/preview.jpg)
+![preview](https://xqgj.cc/xqplayer/test/data/preview.jpg)
 
 ## issue
 

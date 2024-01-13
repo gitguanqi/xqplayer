@@ -1,6 +1,6 @@
 {
     "name": "xqplayer",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "description": "This is a simplify firendly video player.",
     "main": "lib/vue/index.js",
     "directories": {
