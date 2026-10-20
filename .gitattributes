@@ -1,0 +1,17 @@
+* text=auto eol=lf
+
+# 产物由 scripts/build.mjs 生成，diff 时别把整行算作变动
+lib/js/*.min.js linguist-generated=true -diff
+lib/js/*.min.mjs linguist-generated=true -diff
+lib/css/xqplayer.min.css linguist-generated=true -diff
+lib/css/xqplayer-icon.css linguist-generated=true
+
+# 二进制资源不要参与文本 diff
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.svg binary
+*.jpg binary
+*.png binary
+*.mp4 binary

@@ -1,0 +1,114 @@
+/* 由 lib/fonts/iconfont.json 生成，请勿手改 */
+@font-face {
+  font-family: "xqvideo";
+  src: url('../fonts/iconfont.eot?t=1664871125951');
+  src: url('../fonts/iconfont.eot?t=1664871125951#iefix') format('embedded-opentype'),
+    url('../fonts/iconfont.woff2?t=1664871125951') format('woff2'),
+    url('../fonts/iconfont.woff?t=1664871125951') format('woff'),
+    url('../fonts/iconfont.ttf?t=1664871125951') format('truetype'),
+    url('../fonts/iconfont.svg?t=1664871125951#xqvideo') format('svg');
+}
+
+.xvicon {
+  font-family: "xqvideo" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.xvicon-times:before {
+  content: "\e927";
+}
+
+.xvicon-pause:before {
+  content: "\e845";
+}
+
+.xvicon-play1:before {
+  content: "\e625";
+}
+
+.xvicon-close:before {
+  content: "\e659";
+}
+
+.xvicon-play2:before {
+  content: "\e80f";
+}
+
+.xvicon-share:before {
+  content: "\e86f";
+}
+
+.xvicon-play:before {
+  content: "\e72f";
+}
+
+.xvicon-muted:before {
+  content: "\e676";
+}
+
+.xvicon-volume:before {
+  content: "\e740";
+}
+
+.xvicon-fullscreen-exit:before {
+  content: "\e7ec";
+}
+
+.xvicon-fullscreen:before {
+  content: "\e641";
+}
+
+.xvicon-info-circle:before {
+  content: "\e67e";
+}
+
+.xvicon-error:before {
+  content: "\e783";
+}
+
+.xvicon-arrow-right:before {
+  content: "\e62d";
+}
+
+.xvicon-arrow-right2:before {
+  content: "\e62f";
+}
+
+.xvicon-set:before {
+  content: "\e78e";
+}
+
+.xvicon-comment:before {
+  content: "\e781";
+}
+
+.xvicon-dashboard:before {
+  content: "\e618";
+}
+
+.xvicon-video:before {
+  content: "\e690";
+}
+
+.xvicon-chevron-up:before {
+  content: "\ef6f";
+}
+
+.xvicon-search:before {
+  content: "\e82e";
+}
+
+.xvicon-down:before {
+  content: "\e9d4";
+}
+
+.xvicon-file:before {
+  content: "\e671";
+}
+
+.xvicon-circle:before {
+  content: "\eb0f";
+}

@@ -197,10 +197,16 @@
   margin-bottom: 10px;
 }
 
-.xqvideo-box .video-info-box .video-error p a {
+.xqvideo-box .video-info-box .video-error p a,
+.xqvideo-box .video-info-box .video-error p button {
   margin-top: 10px;
   color: #fff;
   text-decoration: underline;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
 .xqvideo-box .video-info-box .video-info-barrages {
@@ -459,7 +465,7 @@
   color: #fff;
 }
 
-.xqvideo-box .video-info-box .video-control .video-control-btn button#play-btn {
+.xqvideo-box .video-info-box .video-control .video-control-btn button[data-xq="play"] {
   display: none;
 }
 
