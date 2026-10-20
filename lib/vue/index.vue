@@ -1,24 +1,24 @@
 <template>
     <div class="xqvideo-box" :style="{'width': videoInfo.width+'px', 'height': videoInfo.height+'px'}">
         <div :class="{'video-info-box': true, 'scale': videoInfo.scale, 'draw': videoInfo.isDraw} " @mouseover="toggleControl(true)"  @mouseout="toggleControl(false)">
-            <video ref="video" tabindex="-1" id="myvideo" preload="auto" @click="playVideo"></video>
+            <video ref="video" tabindex="-1" preload="auto" @click="playVideo"></video>
             <div :class="{'video-loading': true, 'video-loading-text': videoInfo.error}" v-if="videoInfo.loading">
                 <p v-if="videoInfo.error">
-                    <i class="xqvideo xqvideo-error"></i>
+                    <i class="xvicon xvicon-error"></i>
                     <small>视频加载出错！</small>
-                    <a href="#refresh">刷新重试！</a>
+                    <a href="#refresh" @click.prevent="reloadVideo">刷新重试！</a>
                 </p>
                 <p v-else>
                     <span>
-                        <i class="xqvideo xqvideo-video"></i>
+                        <i class="xvicon xvicon-video"></i>
                     </span>
                 </p>
             </div>
             <div class="xqvideo-video-status" v-show="videoInfo.status">
-                <i class="xqvideo xqvideo-info-circle"></i><span>{{ videoInfo.statusText }}</span>
+                <i class="xvicon xvicon-info-circle"></i><span>{{ videoInfo.statusText }}</span>
             </div>
             <div class="xqvideo-video-info" v-show="videoInfo.aboutUs">
-                <i class="xqvideo xqvideo-times" @click="videoInfo.aboutUs = false;"></i>
+                <i class="xvicon xvicon-times" @click="videoInfo.aboutUs = false;"></i>
                 <div class="xqvideo-video-intro">
                     <p v-for="(v, k) in videoInfo.about" :key="k">
                         <span>{{k}}：</span>
@@ -27,12 +27,12 @@
                 </div>
             </div>
             <div class="video-info-close" title="关闭画中画" v-show="videoInfo.isDraw" @click="hideDraw">
-                <i class="xqvideo xqvideo-times"></i>
+                <i class="xvicon xvicon-times"></i>
             </div>
             <div class="video-info-barrages" v-show="videoInfo.barrage">
                     <ul>
                         <li v-for="item in videoInfo.barrageList" :key="item.id">
-                            <img :src="item.avatar" :alt="item.name">
+                            <img v-if="item.avatar" :src="item.avatar" :alt="item.name">
                             <span>{{item.name||'好奇宝宝'}}</span>
                             <small :style="{'color': item.bg}">{{ item.content }}</small>
                         </li>
@@ -45,11 +45,11 @@
                 <div class="video-control-btn">
                     <div class="video-control-left">
                         <button class="mobile-play" title="播放" v-show="!videoInfo.play" @click="playVideo">
-                            <i class="xqvideo xqvideo-play1"></i>
+                            <i class="xvicon xvicon-play1"></i>
                         </button>
                         <button class="mobile-play" title="暂停" v-show="videoInfo.play && !videoInfo.hidePause"
                             @click="playVideo">
-                            <i class="xqvideo xqvideo-pause"></i>
+                            <i class="xvicon xvicon-pause"></i>
                         </button>
                         <span>{{ videoInfo.startTime }}/{{ videoInfo.endTime }}</span>
                     </div>
@@ -68,7 +68,7 @@
                         </div>
                         <div class="video-control-alone mobile-no" @mouseover="showSpeedBar" @mouseout="hideSpeedBar">
                             <button title="倍速">
-                                <i class="xqvideo xqvideo-dashboard"></i>
+                                <i class="xvicon xvicon-dashboard"></i>
                             </button>
                             <div class="video-control-speed" v-show="videoInfo.speed">
                                 <span :class="{'active': videoInfo.curSpeed === item.val}" v-for="item in videoInfo.speeds"
@@ -77,27 +77,27 @@
                         </div>
                         <div class="video-control-alone" @mouseover="showSetBar" @mouseout="hideSetBar">
                             <button title="设置">
-                                <i class="xqvideo xqvideo-set"></i>
+                                <i class="xvicon xvicon-set"></i>
                             </button>
                             <div class="video-control-set" v-show="videoInfo.set">
                                 <p>
                                     小窗播放：
-                                    <input class="offscreen" id="draw" type="checkbox" v-model="videoInfo.draw"
+                                    <input class="offscreen" :id="uid + '-draw'" type="checkbox" v-model="videoInfo.draw"
                                         @change="toggleSetStatus('draw')">
-                                    <label class="switch" for="draw"></label>
+                                    <label class="switch" :for="uid + '-draw'"></label>
                                 </p>
                                 <p>
                                     循环播放：
-                                    <input class="offscreen" id="replay" type="checkbox" v-model="videoInfo.replay"
+                                    <input class="offscreen" :id="uid + '-replay'" type="checkbox" v-model="videoInfo.replay"
                                         @change="toggleSetStatus('replay')">
-                                    <label class="switch" for="replay"></label>
+                                    <label class="switch" :for="uid + '-replay'"></label>
                                 </p>
                             </div>
                         </div>
                         <div class="video-control-alone vol" @mouseover="showVolBar" @mouseout="hideVolBar">
                             <button title="音量" @click="videoMuted">
-                                <i class="xqvideo xqvideo-volume" v-show="!videoInfo.muted"></i>
-                                <i class="xqvideo xqvideo-muted" v-show="videoInfo.muted"></i>
+                                <i class="xvicon xvicon-volume" v-show="!videoInfo.muted"></i>
+                                <i class="xvicon xvicon-muted" v-show="videoInfo.muted"></i>
                             </button>
                             <div class="video-control-volum" v-show="videoInfo.mutedBar">
                                 <span ref="volBar">
@@ -106,30 +106,53 @@
                             </div>
                         </div>
                         <button title="全屏" v-show="!videoInfo.scale" @click="fullScreenOpen">
-                            <i class="xqvideo xqvideo-fullscreen"></i>
+                            <i class="xvicon xvicon-fullscreen"></i>
                         </button>
                         <button title="复原" v-show="videoInfo.scale" @click="fullScreenCancel">
-                            <i class="xqvideo xqvideo-fullscreen-exit"></i>
+                            <i class="xvicon xvicon-fullscreen-exit"></i>
                         </button>
                         <button title="视频信息" @click="showAbout">
-                            <i class="xqvideo xqvideo-info-circle"></i>
+                            <i class="xvicon xvicon-info-circle"></i>
                         </button>
                         <button title="分享" @click="toggleShare">
-                            <i class="xqvideo xqvideo-share"></i>
+                            <i class="xvicon xvicon-share"></i>
                         </button>
                         <a title="举报" href="https://www.12377.cn/" target="_blank">
-                            <i class="xqvideo xqvideo-error"></i>
+                            <i class="xvicon xvicon-error"></i>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-        <xq-share :type="share.type" :show="share.show" :url="share.url" :title="share.title"></xq-share>
+        <component :is="shareComponent" :type="share.type" :show="share.show" :url="share.url" :title="share.title"></component>
     </div>
 </template>
 
 <script>
-    import xqshare from 'xqshare'
+    let instanceSeq = 0;
+
+    /**
+     * 分享组件空壳。xqshare 不再是硬依赖：宿主可通过 `share-resolver` 传入自己的分享组件，
+     * 也可以用 CDN 挂到 window.XqShare，两者都没有时用它兜底，不渲染任何东西。
+     */
+    const XQ_SHARE_STUB = {
+        name: 'xq-share-stub',
+        props: {
+            type: { type: String, default: 'pop' },
+            show: { type: Boolean, default: false },
+            url: { type: String, default: '' },
+            title: { type: String, default: '' },
+        },
+        render(h) {
+            // Vue 3 把 h 作为参数传入，Vue 2 挂在 this.$createElement；两种都能取到
+            const create = h || this.$createElement;
+            if (!create) {
+                return null;
+            }
+            return create('i', { style: { display: 'none' } });
+        },
+    };
+
     export default {
         name: 'xqvideo',
         props: {
@@ -139,7 +162,7 @@
             },
             'poster': {
                 type: String,
-                required: true,
+                default: '',
             },
             'barrages': {
                 type: Array,
@@ -159,9 +182,20 @@
             'shareTitle': {
                 type: String,
             },
+            // 可选的分享组件（宿主 app.use(...) 之前塞进来，或 CDN 挂到 window.XqShare）
+            'shareResolver': {
+                type: [Object, Function],
+                default: null,
+            },
         },
         data() {
             return {
+                // 同页多实例时用于隔离 label/checkbox 的 id
+                uid: 'xqv-' + (instanceSeq += 1),
+                // 视频总时长（秒），由 timeupdate 写入；原实现读 this.total 恒为 undefined
+                duration: 0,
+                statusTimer: 0,
+                mediaHandle: null,
                 videoInfo: {
                     play: false, // 播放
                     scale: false, // 缩放
@@ -191,7 +225,7 @@
                     barrageList: [],
                     about: { // 关于我们
                         name: 'XQVideoPlayer',
-                        version: 'v0.0.1',
+                        version: '0.1.0',
                         url: '',
                         type: '',
                         duration: 0,
@@ -245,26 +279,55 @@
             }
         },
         watch: {
-            '$route.query.type': function (val) {
+            'routeType': function (val) {
                 this.checkType(val);
             },
-            'barrages': function (val) {
-                this.videoInfo.barrageList = val;
-                this.showBarrage();
-            }
+            'barrages': {
+                handler(val) {
+                    this.applyBarrages(val);
+                },
+                immediate: true,
+            },
+        },
+        computed: {
+            // 未安装 vue-router 时返回 undefined，不再抛错
+            routeType() {
+                return this.$route && this.$route.query ? this.$route.query.type : undefined;
+            },
+            // xqshare 降级为「运行时可选」：优先用宿主演进来的组件，
+            // 其次用全局 XqShare（CDN 引入），都没有时用一个空壳，避免解析失败整页崩。
+            shareComponent() {
+                if (this.shareResolver) {
+                    return this.shareResolver;
+                }
+                const globalShare =
+                    typeof window !== 'undefined' && window.XqShare ? window.XqShare : null;
+                return globalShare || XQ_SHARE_STUB;
+            },
+            hasShare() {
+                return Boolean(this.shareResolver || (typeof window !== 'undefined' && window.XqShare));
+            },
         },
         components: {
-            'xqshare': xqshare,
+            'xq-share': XQ_SHARE_STUB,
         },
         mounted() {
             this.checkType();
             this.setVideo();
             this.videoEvent();
         },
+        // Vue 3
+        beforeUnmount() {
+            this.teardown();
+        },
+        // Vue 2
+        beforeDestroy() {
+            this.teardown();
+        },
         methods: {
             // 检测类型
             checkType(openType) {
-                let type = openType || this.$route.query.type;
+                let type = openType || this.routeType;
                 if (type && type == 'iframe') {
                     this.videoInfo.scale = true;
                 }
@@ -274,7 +337,6 @@
                 let pageAddr = location.origin+location.pathname;
                 this.videoInfo.url = this.url;
                 this.videoInfo.poster = this.poster;
-                this.videoInfo.total = this.total;
                 this.videoInfo.mode = this.mode;
                 this.videoInfo.about.url = pageAddr;
                 this.videoInfo.about.type = this.mode;
@@ -287,6 +349,10 @@
             // 显示分享
             toggleShare () {
                 if (!this.videoInfo.url) return;
+                if (!this.hasShare) {
+                    this.setStatus('分享组件未加载');
+                    return;
+                }
                 this.share.show = !this.share.show;
             },
             
@@ -307,21 +373,23 @@
                 this.videoInfo.barrageContent = '';
             },
 
-            // 显示弹幕
-            showBarrage () {
-                let list = this.videoInfo.barrageList,
-                newArr = [];
-                if (list && list.length) {
-                    for (const item of list) {
-                        newArr.push({
-                            avatar: item.avatar || '/favicon.ico',
-                            name: item.name || '用户'+Math.random(0,1000000)*100,
-                            content: item.content,
-                            bg: this.randomColor(),
-                        }); 
-                    }
-                    this.videoInfo.barrageList = newArr;
+            // 把外部弹幕数据归一化一次，之后不再重复生成随机色
+            applyBarrages (list) {
+                if (!list || !list.length) {
+                    this.videoInfo.barrageList = [];
+                    return;
                 }
+                this.videoInfo.barrageList = list.map((item, index) => ({
+                    id: item.id || index,
+                    avatar: item.avatar || '',
+                    name: item.name || '好奇宝宝',
+                    content: item.content || '',
+                    bg: this.randomColor(),
+                }));
+            },
+            // 显示弹幕（保留旧调用名）
+            showBarrage () {
+                this.applyBarrages(this.barrages);
             },
             
             // 随机颜色
@@ -332,6 +400,7 @@
                 r = r < 120 ? 120 : r;
                 g = g < 120 ? 120 : g;
                 b = b < 120 ? 120 : b;
+                // r/g/b 已保证 >=120，转换后一定是两位十六进制
                 let color = `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
                 return color;
             },
@@ -339,63 +408,75 @@
             initVideo ({
                 video, type, url, poster 
             }) {
-                if (video) {
-                    if (type && ['mp4', 'flv', 'm3u8'].includes(type)) {
+                if (!video) {
+                    console.error('[xqplayer] tip: video not null!');
+                    return;
+                }
+                if (!type || ['mp4', 'flv', 'm3u8'].indexOf(type) === -1) {
+                    console.error('[xqplayer] tip: type error!');
+                    return;
+                }
+                // 先销毁上一个流实例，换源时不残留
+                this.destroyMedia();
 
-                        // mp4播放
-                        if (type == 'mp4') {
-                            video.src = url;
-                        }
-                        // m3u8格式播放
-                        if (type == 'm3u8') {
-                            if (Hls.isSupported()) {
-                                var hls = new Hls();
-                                // bind them together
-                                hls.attachMedia(video);
-                                hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-                                hls.loadSource(url);
-                                hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                                        console.log(
-                                        'manifest loaded, found ' + data.levels.length + ' quality level'
-                                        );
-                                    });
-                                });
-                            } else {
-                                console.error('tip: m3u8 video play error!');
-                            }
-                        }
-                        // flv播放
-                        if (type == 'flv') {
-                            if (flvjs.isSupported()) {
-                                var flvPlayer = flvjs.createPlayer({
-                                    type: 'flv',
-                                    url,
-                                });
-                                flvPlayer.attachMediaElement(video);
-                                flvPlayer.load();
-                                flvPlayer.play();
-                            } else {
-                                console.error('tip: flv video play error!');
-                            }
-                        }
+                // mp4播放
+                if (type == 'mp4') {
+                    video.src = url;
+                }
+                // m3u8格式播放：Hls 是外部可选依赖，先探测再使用
+                if (type == 'm3u8') {
+                    const HlsLib = typeof Hls !== 'undefined' ? Hls : (typeof window !== 'undefined' ? window.Hls : null);
+                    if (HlsLib && HlsLib.isSupported()) {
+                        const hls = new HlsLib();
+                        this.mediaHandle = hls;
+                        hls.attachMedia(video);
+                        hls.on(HlsLib.Events.MEDIA_ATTACHED, () => {
+                            hls.loadSource(url);
+                            hls.on(HlsLib.Events.MANIFEST_PARSED, (event, data) => {
+                                console.log(
+                                    '[xqplayer] manifest loaded, found ' + data.levels.length + ' quality level'
+                                );
+                            });
+                        });
                     } else {
-                        console.error('tip: type error!');
+                        console.error('[xqplayer] tip: m3u8 video play error!');
+                        this.setErrorState('m3u8 需要引入 hls.js');
                     }
+                }
+                // flv播放：flvjs 同理
+                if (type == 'flv') {
+                    const FlvLib = typeof flvjs !== 'undefined' ? flvjs : (typeof window !== 'undefined' ? window.flvjs : null);
+                    if (FlvLib && FlvLib.isSupported()) {
+                        const flvPlayer = FlvLib.createPlayer({
+                            type: 'flv',
+                            url,
+                        });
+                        this.mediaHandle = flvPlayer;
+                        flvPlayer.attachMediaElement(video);
+                        flvPlayer.load();
+                        flvPlayer.play();
+                    } else {
+                        console.error('[xqplayer] tip: flv video play error!');
+                        this.setErrorState('flv 需要引入 flv.js');
+                    }
+                }
 
-                    // 设置海报
-                    if (poster) {
-                        video.setAttribute('poster', poster);
-                    }
-                } else {
-                    console.error('tip: video not null!');
+                // 设置海报
+                if (poster) {
+                    video.setAttribute('poster', poster);
                 }
             },
 
             // 视频加载
             videoEvent() {
-                let myVideo = document.getElementById('myvideo');
+                let myVideo = this.$refs.video;
                 let url = this.videoInfo.url;
-                let poster = this.videoInfo.poster || '/img/fm1.png';
+                let poster = this.videoInfo.poster || '';
+
+                if (!myVideo) {
+                    console.error('[xqplayer] tip: video not mounted!');
+                    return;
+                }
 
                 this.initVideo({
                     video: myVideo,
@@ -429,19 +510,16 @@
                 })
 
                 myVideo.addEventListener('timeupdate', () => {
-                    let currentTime = 0;
-                    currentTime = myVideo.currentTime;
-                    let total = myVideo.duration;
-                    if (currentTime) {
-                        this.videoInfo.startTime = this.secondToTime(currentTime);
-                    }
+                    let currentTime = myVideo.currentTime || 0;
+                    // duration 可能是 NaN（直播 / 未加载完），这里统一收敛为数字
+                    let total = Number.isFinite(myVideo.duration) ? myVideo.duration : 0;
                     if (total) {
-                        this.videoInfo.endTime = this.secondToTime(myVideo.duration);
-                        this.videoInfo.about.duration = myVideo.duration;
+                        this.duration = total;
+                        this.videoInfo.endTime = this.secondToTime(total);
+                        this.videoInfo.about.duration = total;
                     }
-                    if (currentTime && total) {
-                        this.videoInfo.process = (currentTime / myVideo.duration) * 100;
-                    }
+                    this.videoInfo.startTime = this.secondToTime(currentTime);
+                    this.videoInfo.process = total ? (currentTime / total) * 100 : 0;
                 }, false);
                 myVideo.addEventListener('ended', () => {
                     if (this.videoInfo.replay) {
@@ -451,7 +529,8 @@
                         this.videoInfo.play = false;
                     }
                 })
-                myVideo.addEventListener('error', function (e) {
+                // 原来是普通函数，回调里的 this 是 video 元素，赋值直接抛 TypeError
+                myVideo.addEventListener('error', () => {
                     this.videoInfo.error = true;
                     this.videoInfo.loading = false;
                 })
@@ -473,35 +552,27 @@
 
             // 计算秒数
             secondToTime(second) {  
-                let s = 0;
-                let m = 0;
-                let h = 0;
-                let sNum = second % 60;
-                let res = '';
-                if (second < 3600) {
-                    s = sNum;
-                    m = parseInt(second / 60);
-                    h = 0;
-                } else {
-                    let mNum = second % 3600;
-                    if (mNum % 60 < 60) {
-                    s = mNum % 60;
-                    m = parseInt(mNum / 60)
-                    }
-                    m = parseInt(mNum / 60);
-                    h = parseInt(second / 3600);
+                // NaN / 负数 / Infinity 一律按 0 处理，避免渲染出 "NaN:NaN:NaN"
+                let num = Number(second);
+                if (!Number.isFinite(num) || num < 0) {
+                    num = 0;
                 }
-                s = s > 10 ? parseInt(s) : '0' + parseInt(s);
-                m = m > 10 ? m : '0' + m;
-                h = h > 10 ? h : '0' + h;
-                res = h + ':' + m + ':' + s;
-                return res;
+                let total = Math.floor(num);
+                let s = total % 60;
+                let m = Math.floor(total / 60) % 60;
+                let h = Math.floor(total / 3600);
+                // 注意是 >= 10 而不是 > 10：10 秒应该得到 "10" 而不是 "010"
+                let pad = (val) => (val >= 10 ? String(val) : '0' + val);
+                return pad(h) + ':' + pad(m) + ':' + pad(s);
             },
 
-            // 画中画
+            // 画中画：原来直接覆盖 window.onscroll，多实例互相顶掉且无法解绑
             addDraw() {
-                window.onscroll = () => {
-                    let top = document.documentElement.scrollTop;
+                if (this._onScroll) {
+                    return;
+                }
+                this._onScroll = () => {
+                    let top = document.documentElement.scrollTop || document.body.scrollTop || 0;
                     if (this.videoInfo.draw) {
                         if (top > 800) {
                             this.videoInfo.isDraw = true;
@@ -510,7 +581,8 @@
                             this.videoInfo.isDraw = false;
                         }
                     }
-                }
+                };
+                window.addEventListener('scroll', this._onScroll, { passive: true });
             },
 
             // 隐藏画中画
@@ -521,64 +593,96 @@
 
             // 添加歌曲音量控制事件
             addVolEvent() {
-                let xqVideo = document.getElementById('myvideo');
                 let volBar = this.$refs.volBar;
-
-                // 鼠标按下
-                volBar.addEventListener('mousedown', (e) => {
-                    
-                    let videoBox = document.querySelector('.xqvideo-box').offsetTop;
-                    let volBox = document.querySelector('.video-control').offsetTop;
-                    let num = e.clientY - videoBox;
-                    num = (volBox - num) + 6;
-                    let hei = e.target.clientHeight;
-                    let vol = num / hei;
-                    vol = vol > 1 ? 1 : vol < 0.1 ? 0.01 : vol;
-                    let volFin = vol;
-                    this.videoInfo.vol = volFin * 100;
-                    xqVideo.volume = volFin;
-                    if (volFin <= 0) {
-                        this.videoInfo.muted = true;
-                    } else {
-                        this.videoInfo.muted = false;
+                if (!volBar) {
+                    return;
+                }
+                const setVolume = (clientY, video) => {
+                    const rect = volBar.getBoundingClientRect();
+                    const ratio = (clientY - rect.top) / (rect.height || 1);
+                    // 柱体顶端是 100%
+                    const vol = 1 - Math.min(1, Math.max(0, ratio));
+                    this.videoInfo.vol = Math.round(vol * 100);
+                    if (video) {
+                        video.volume = vol;
+                        video.muted = vol <= 0;
                     }
+                    this.videoInfo.muted = vol <= 0;
+                };
 
-                }, false);
+                // 原来只在 mousedown 里算一次、且用音柱外的坐标做参考系，拖动完全无效
+                this._volHandlers = {
+                    down: (e) => {
+                        this._volDragging = true;
+                        setVolume(e.clientY, this.$refs.video);
+                    },
+                    move: (e) => {
+                        if (!this._volDragging) {
+                            return;
+                        }
+                        setVolume(e.clientY, this.$refs.video);
+                    },
+                    up: () => {
+                        this._volDragging = false;
+                    },
+                };
 
-                // 鼠标抬起
-                volBar.addEventListener('mouseup', function () {
-                    volBar.onmousemove = null;
-                }, false);
+                volBar.addEventListener('mousedown', this._volHandlers.down, false);
+                volBar.addEventListener('mousemove', this._volHandlers.move, false);
+                document.addEventListener('mouseup', this._volHandlers.up, false);
             },
-
 
             // 添加进度条事件
             addProgreeEvent() {
                 let progressBar = this.$refs.progressbar;
-                let xqvideo = document.getElementById('myvideo');
+                if (!progressBar) {
+                    return;
+                }
 
-                // 鼠标按下
-                progressBar.addEventListener('mousedown', function (e) {
+                const seek = (clientX) => {
+                    const rect = progressBar.getBoundingClientRect();
+                    if (!rect.width) {
+                        return;
+                    }
+                    // 原实现的 clamp 是条空语句（`num > 1 ? 1 : ...;` 没赋值），
+                    // 且拿 this.videoInfo.total（从不存在的 prop 读来）算时间 → NaN
+                    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+                    const video = this.$refs.video;
+                    this.videoInfo.process = ratio * 100;
+                    if (video && Number.isFinite(video.duration) && video.duration > 0) {
+                        video.currentTime = ratio * video.duration;
+                        // 这里写的是格式化后的时间，原来的 parseFloat(currentTime.toFixed(6)) 会把秒数直接显示出来
+                        this.videoInfo.startTime = this.secondToTime(video.currentTime);
+                    }
+                };
 
-                    let num = e.offsetX / e.target.clientWidth;
-                    num > 1 ? 1 : num < 0.1 ? 0.01 : num;
-                    let dotWin = num * 100;
-                    let currentTime = num * this.videoInfo.total;
-                    this.videoInfo.process = dotWin;
-                    this.videoInfo.startTime = parseFloat(currentTime.toFixed(6));
-                    xqvideo.currentTime = currentTime;
+                this._proHandlers = {
+                    down: (e) => {
+                        this._proDragging = true;
+                        seek(e.clientX);
+                    },
+                    move: (e) => {
+                        if (!this._proDragging) {
+                            return;
+                        }
+                        seek(e.clientX);
+                    },
+                    up: () => {
+                        this._proDragging = false;
+                    },
+                };
 
-                }, false);
-
-                // 鼠标抬起
-                progressBar.addEventListener('mouseup', function () {
-                    progressBar.onmousemove = null;
-                }, false);
+                progressBar.addEventListener('mousedown', this._proHandlers.down, false);
+                progressBar.addEventListener('mousemove', this._proHandlers.move, false);
+                document.addEventListener('mouseup', this._proHandlers.up, false);
             },
 
             // 视频操作
             playVideo() {
-                let video = document.getElementById('myvideo');
+                let video = this.$refs.video;
+                if (!video) {
+                    return;
+                }
                 this.videoInfo.play = !this.videoInfo.play;
                 let isMobile = 'ontouchstart' in document;
                 if (this.videoInfo.play) {
@@ -595,28 +699,36 @@
 
             // 静音
             videoMuted() {
-                let video = document.getElementById('myvideo');
+                let video = this.$refs.video;
                 this.videoInfo.muted = !this.videoInfo.muted;
-                if (this.videoInfo.muted) {
-                    video.muted = true;
-                    video.volume = 0;
-                    this.videoInfo.vol = 0;
-                } else {
-                    video.muted = false;
-                    video.volume = 1;
-                    this.videoInfo.vol = 100;
+                if (video) {
+                    video.muted = this.videoInfo.muted;
+                    video.volume = this.videoInfo.muted ? 0 : 1;
                 }
+                this.videoInfo.vol = this.videoInfo.muted ? 0 : 100;
             },
 
-            // fullscreen set
+            // fullscreen set：原来直接改写 document.body.className，会把宿主页面的类全清掉
             fullScreenOpen() {
                 this.videoInfo.scale = true;
-                document.body.className = 'hide';
+                this.toggleScrollLock(true);
             },
 
             fullScreenCancel() {
                 this.videoInfo.scale = false;
-                document.body.className = '';
+                this.toggleScrollLock(false);
+            },
+
+            // 只增删自己的那一个类，不动宿主已有的 class
+            toggleScrollLock(locked) {
+                if (typeof document === 'undefined' || !document.body) {
+                    return;
+                }
+                if (locked) {
+                    document.body.classList.add('xqvideo-lock-scroll');
+                } else {
+                    document.body.classList.remove('xqvideo-lock-scroll');
+                }
             },
 
             // 显示关于
@@ -674,9 +786,11 @@
 
             // 切换速度
             toggleSpeed(val) {
-                let myVideo = document.getElementById('myvideo');
+                let myVideo = this.$refs.video;
                 this.videoInfo.curSpeed = val;
-                myVideo.playbackRate = val;
+                if (myVideo) {
+                    myVideo.playbackRate = val;
+                }
                 this.setStatus(`已切换到${val}倍速！`);
             },
 
@@ -691,16 +805,91 @@
 
             // 视频状态设置
             setStatus(val) {
+                // 连续调用时清掉上一个定时器，否则后一条会被前一条提前关掉
+                if (this.statusTimer) {
+                    clearTimeout(this.statusTimer);
+                }
                 this.videoInfo.status = true;
                 this.videoInfo.statusText = val;
-                setTimeout(() => {
+                this.statusTimer = setTimeout(() => {
                     this.videoInfo.status = false;
                     this.videoInfo.statusText = '';
+                    this.statusTimer = 0;
                 }, 1000);
+            },
+
+            // 进入错误态
+            setErrorState(text) {
+                this.videoInfo.error = true;
+                this.videoInfo.loading = false;
+                if (text) {
+                    this.setStatus(text);
+                }
+            },
+
+            // 刷新重试
+            reloadVideo() {
+                const video = this.$refs.video;
+                if (!video) {
+                    return;
+                }
+                this.videoInfo.error = false;
+                this.videoInfo.loading = true;
+                this.videoInfo.play = false;
+                this.initVideo({
+                    video,
+                    type: this.videoInfo.mode,
+                    url: this.videoInfo.url,
+                    poster: this.videoInfo.poster,
+                });
+            },
+
+            // 销毁 hls/flv 实例
+            destroyMedia() {
+                if (this.mediaHandle && typeof this.mediaHandle.destroy === 'function') {
+                    try {
+                        this.mediaHandle.destroy();
+                    } catch (err) {
+                        /* 销毁失败不应影响组件卸载 */
+                    }
+                }
+                this.mediaHandle = null;
+            },
+
+            // 组件卸载前统一收尾，beforeUnmount(Vue 3) 与 beforeDestroy(Vue 2) 都会调用
+            teardown() {
+                this.destroyMedia();
+                if (this.statusTimer) {
+                    clearTimeout(this.statusTimer);
+                    this.statusTimer = 0;
+                }
+                if (this._onScroll) {
+                    window.removeEventListener('scroll', this._onScroll);
+                    this._onScroll = null;
+                }
+                if (this._volHandlers) {
+                    document.removeEventListener('mouseup', this._volHandlers.up);
+                    this._volHandlers = null;
+                }
+                if (this._proHandlers) {
+                    document.removeEventListener('mouseup', this._proHandlers.up);
+                    this._proHandlers = null;
+                }
+                // 避免误给宿主留下滚动锁
+                this.toggleScrollLock(false);
             },
         },
     }
 </script>
+
+<!-- 非 scoped：只有全屏时给 body 加的滚动锁。
+     图标用的是 lib/css/xqplayer.css 里的 .xvicon-* 定义，宿主照常引入即可，
+     不再在组件里 @import 一份副本来避免重复打包。 -->
+<style>
+    .xqvideo-lock-scroll {
+        overflow: hidden;
+    }
+</style>
 
 <style lang="less" scoped>
     @mainColor: #d32d2d;
@@ -712,13 +901,6 @@
     @nine: #999;
     @f8: #f8f8f8;
     @c: #ccc;
-    body {
-        .hide {
-            width: 100%;
-            height: 10vh;
-            overflow: hidden;
-        }
-    }
     .xqvideo-box {
         position: relative;
         .video-info-box {
