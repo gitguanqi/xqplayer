@@ -1,60 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>xqplayer browser test</title>
-    <link rel="stylesheet" href="https://xqgj.cc/xqcdn/libs/xqshare/css/xqshare.min.css">
+    <title>xqplayer · UMD 自检</title>
     <link rel="stylesheet" href="../lib/css/xqplayer.min.css">
-    <style>
-        body {
-            height: 3000px;
-        }
-    </style>
+    <link rel="stylesheet" href="demo/demo.css">
 </head>
 
 <body>
-    <h3>xqplayer browser test</h3>
-    <div id="myPlayer"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.6.1/flv.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.0.8/hls.min.js"></script>
-    <script src="https://xqgj.cc/xqcdn/libs/xqshare/js/xqshare.min.js"></script>
+    <h1>UMD 引入自检</h1>
+    <p class="lead">
+        用 &lt;script&gt; 加载 lib/js/xqplayer.min.js，验证全局导出、多实例隔离、XSS 转义与 destroy。
+    </p>
+
+    <nav class="pages">
+        <a href="index.html">返回导航</a>
+        <a href="esm.html">ESM</a>
+        <a href="vue2.html">Vue 2</a>
+        <a href="vue3.html">Vue 3</a>
+    </nav>
+
+    <h3>实例 A</h3>
+    <div class="player-host" id="playerA"></div>
+
+    <h3>实例 B</h3>
+    <div class="player-host" id="playerB"></div>
+
+    <div class="report" data-xq-report></div>
+
+    <script src="demo/check.js"></script>
     <script src="../lib/js/xqplayer.min.js"></script>
     <script>
-        let myVideo = new XQVideoPlayer({
-            el: '#myPlayer',
+        XQCheck.assert('暴露了全局 XQVideoPlayer', function () {
+            if (typeof XQVideoPlayer !== 'function') throw new Error('未定义');
+        });
+        XQCheck.assert('版本号可读', function () {
+            if (typeof XQVideoPlayer.version !== 'string') throw new Error('缺少 version');
+        });
+
+        var a = new XQVideoPlayer({
+            el: '#playerA',
             url: './data/movie.mp4',
             poster: './data/poster.jpg',
             barrages: [
-                {
-                    id: 1,
-                    avatar: '',
-                    name: '测试1',
-                    content: '哈哈哈',
-                },
-                {
-                    id: 2,
-                    avatar: '',
-                    name: '测试2',
-                    content: '可以的',
-                },
-                {
-                    id: 3,
-                    avatar: '',
-                    name: '测试3',
-                    content: '真好啊',
-                }
+                { id: 1, avatar: '', name: '测试1', content: '哈哈哈' },
+                { id: 2, avatar: '', name: '测试2', content: '可以的' },
             ],
             mode: 'mp4',
-            width: 1200,
-            height: 600,
+            width: 720,
+            height: 405,
         });
-        console.log(myVideo);
+        // 故意不传 poster：0.0.x 会因此抛 "poster is must!"
+        var b = new XQVideoPlayer({
+            el: '#playerB',
+            url: './data/movie.mp4',
+            mode: 'mp4',
+            width: 720,
+            height: 405,
+        });
 
+        XQCheck.assert('A 挂载成功且根节点独立', function () {
+            if (!a.root || a.root === b.root) throw new Error('根节点不是各自独立的');
+        });
+        XQCheck.assert('不传 poster 也能构造', function () {
+            if (!b.root) throw new Error('缺少根节点');
+        });
+        XQCheck.assert('进度条样式里没有 undefined', function () {
+            var style = a.refs.progressDot.getAttribute('style') || '';
+            if (style.indexOf('undefined') !== -1) throw new Error(style);
+        });
+        XQCheck.equal('secondToTime(10)', a.secondToTime(10), '00:00:10');
+        XQCheck.equal('secondToTime(3661)', a.secondToTime(3661), '01:01:01');
+        XQCheck.equal('secondToTime(NaN) 不炸', a.secondToTime(NaN), '00:00:00');
+
+        XQCheck.assert('两个实例的 video 不是同一个节点', function () {
+            if (a.refs.video === b.refs.video) throw new Error('串了');
+        });
+        XQCheck.assert('DOM 里不再出现写死的 id', function () {
+            if (document.getElementById('myvideo')) throw new Error('仍有 #myvideo');
+            if (document.getElementById('progressbar')) throw new Error('仍有 #progressbar');
+        });
+
+        // 点 B 的播放，A 不能被卷进去
+        b.refs.play.click();
+        XQCheck.assert('点 B 播放不影响 A', function () {
+            if (a.refs.video.paused === b.refs.video.paused && b.refs.video.paused === false) {
+                throw new Error('两者的播放状态被同时改写了');
+            }
+        });
+
+        // 弹幕：内容里的 HTML 必须被转义
+        a.toggleBarrage();
+        a.refs.barrageInput.value = '<img src=x onerror=alert(1)>';
+        a.sendBarrage();
+        XQCheck.assert('弹幕内容被转义，不会注入 HTML', function () {
+            if (a.refs.barrageList.querySelector('img')) throw new Error('插入了真实 img 节点');
+            if (a.refs.barrageList.textContent.indexOf('<img') === -1) throw new Error('内容丢失');
+        });
+
+        // destroy 必须从 DOM 里摘干净
+        a.destroy();
+        XQCheck.assert('destroy 后节点已移除', function () {
+            if (a.root) throw new Error('root 未置空');
+            if (document.querySelector('#playerA .xqvideo-box')) throw new Error('DOM 仍在');
+        });
+        XQCheck.assert('destroy 后 B 依旧可用', function () {
+            if (!b.root) throw new Error('B 被误伤');
+        });
     </script>
 </body>
 
-</html>   
-                
+</html>

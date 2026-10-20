@@ -1,0 +1,111 @@
+/* 测试页公共样式：只服务自检场景，不属于发行包 */
+
+:root {
+    --line: #e5e7eb;
+    --muted: #6b7280;
+    --good: #047857;
+    --bad: #b91c1c;
+    --skip: #92400e;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 24px;
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    color: #111827;
+    background: #f9fafb;
+}
+
+h1 {
+    margin: 0 0 4px;
+    font-size: 20px;
+}
+
+p.lead {
+    margin: 0 0 20px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+nav.pages {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+nav.pages a {
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: #111827;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+nav.pages a:hover {
+    border-color: #9ca3af;
+}
+
+.player-host {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 0 8px;
+}
+
+.report {
+    margin-top: 24px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: normal;
+}
+
+.report .summary {
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.report .summary.good {
+    color: var(--good);
+}
+
+.report .summary.bad {
+    color: var(--bad);
+}
+
+.report .line b {
+    display: inline-block;
+    width: 52px;
+}
+
+.report .line.pass b {
+    color: var(--good);
+}
+
+.report .line.fail b {
+    color: var(--bad);
+}
+
+.report .line.skip b {
+    color: var(--skip);
+}
+
+.report .line .detail {
+    color: var(--muted);
+}
+
+.hint {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+}

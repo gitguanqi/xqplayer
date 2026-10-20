@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xqplayer · Vue 2 自检</title>
+    <link rel="stylesheet" href="../lib/css/xqplayer.min.css">
+    <link rel="stylesheet" href="demo/demo.css">
+</head>
+
+<body>
+    <h1>Vue 2 组件自检</h1>
+    <p class="lead">
+        运行时编译 <code>lib/vue/index.vue</code> 并挂载，验证插件 install、props 与多实例。
+        CDN 拉不到依赖时整页显示 SKIP。
+    </p>
+
+    <nav class="pages">
+        <a href="index.html">返回导航</a>
+        <a href="browser.html">UMD</a>
+        <a href="esm.html">ESM</a>
+        <a href="vue3.html">Vue 3</a>
+    </nav>
+
+    <div id="app">
+        <xq-video
+            ref="first"
+            url="./data/movie.mp4"
+            poster="./data/poster.jpg"
+            :width="720"
+            :height="405"
+            :barrages="[{ id: 1, name: '测试1', content: '来自 Vue 2' }]"
+        ></xq-video>
+        <xq-video ref="second" url="./data/movie.mp4" :width="480" :height="270"></xq-video>
+    </div>
+
+    <div class="report" data-xq-report></div>
+
+    <script src="demo/check.js"></script>
+    <script src="demo/load-sfc.js"></script>
+    <script>
+        XqSfcRunner({
+            label: '2',
+            check: XQCheck,
+            vueGlobal: 'Vue',
+            loaderGlobal: 'vue2-sfc-loader',
+            vueUrls: [
+                'https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.min.js',
+                'https://unpkg.com/vue@2.7.16/dist/vue.min.js',
+            ],
+            lessUrls: [
+                'https://cdn.jsdelivr.net/npm/less@4.2.0/dist/less.min.js',
+                'https://unpkg.com/less@4.2.0/dist/less.min.js',
+            ],
+            loaderUrls: [
+                'https://cdn.jsdelivr.net/npm/vue2-sfc-loader@0.9.5/dist/vue2-sfc-loader.js',
+                'https://unpkg.com/vue2-sfc-loader@0.9.5/dist/vue2-sfc-loader.js',
+            ],
+            bootstrap: function (Vue, component) {
+                XQCheck.assert('SFC 编译成功', function () {
+                    if (!component) throw new Error('组件为空');
+                });
+
+                Vue.component('xq-video', component);
+                new Vue({ el: '#app' });
+
+                var first = document.querySelector('#app').__vue__.$refs.first;
+                var second = document.querySelector('#app').__vue__.$refs.second;
+
+                XQCheck.assert('组件挂载成功', function () {
+                    if (!first || !first.$el) throw new Error('拿不到第一个实例');
+                });
+                XQCheck.assert('不传 poster 也能挂载', function () {
+                    if (!second || !second.$el) throw new Error('第二个实例没挂上');
+                });
+                XQCheck.assert('两个实例的 uid 不同', function () {
+                    if (!second || first.uid === second.uid) throw new Error('uid 相同');
+                });
+                XQCheck.assert('checkbox 的 id 不再重复', function () {
+                    var inputs = document.querySelectorAll('input[type="checkbox"]');
+                    var ids = Array.prototype.map.call(inputs, function (i) {
+                        return i.id;
+                    });
+                    if (new Set(ids).size !== ids.length) throw new Error('存在重复 id：' + ids.join(','));
+                });
+                XQCheck.assert('label 指向了各自的 checkbox', function () {
+                    var labels = document.querySelectorAll('label[for]');
+                    var miss = 0;
+                    Array.prototype.forEach.call(labels, function (l) {
+                        if (!document.getElementById(l.getAttribute('for'))) miss += 1;
+                    });
+                    if (miss) throw new Error(miss + ' 个 label 指向不存在的 id');
+                });
+                XQCheck.equal('secondToTime(65)', first.secondToTime(65), '00:01:05');
+
+                // 卸载也要干净
+                first.teardown();
+                XQCheck.assert('teardown 后 body 上没有残留的滚动锁类', function () {
+                    if (document.body.classList.contains('xqvideo-lock-scroll')) {
+                        throw new Error('还有滚动锁');
+                    }
+                });
+            },
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xqplayer 自检页导航</title>
+    <link rel="stylesheet" href="demo/demo.css">
+</head>
+
+<body>
+    <h1>xqplayer 自检页面</h1>
+    <p class="lead">
+        每个页面都会在页面底部输出 PASS / FAIL / SKIP 汇总，不需要打开 devtools。
+        Vue 两页依赖 CDN 加载运行时，取不到时会显示 SKIP 而不是 FAIL。
+    </p>
+
+    <nav class="pages">
+        <a href="browser.html">UMD（script 标签）</a>
+        <a href="esm.html">ESM（type=module）</a>
+        <a href="vue2.html">Vue 2 组件</a>
+        <a href="vue3.html">Vue 3 组件</a>
+    </nav>
+
+    <h1>how to run</h1>
+    <pre class="report">npm run serve
+# 打开 http://localhost:5173/test/index.html</pre>
+
+    <p class="hint">
+        注意：必须通过 HTTP 打开。直接 file:// 打开会因为 ES module 的同源策略与视频 Range 请求而失败。
+    </p>
+</body>
+
+</html>

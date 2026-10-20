@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xqplayer · Vue 3 自检</title>
+    <link rel="stylesheet" href="../lib/css/xqplayer.min.css">
+    <link rel="stylesheet" href="demo/demo.css">
+</head>
+
+<body>
+    <h1>Vue 3 组件自检</h1>
+    <p class="lead">
+        用 Vue 3 的 createApp 挂载同一个 <code>lib/vue/index.vue</code>，
+        重点验证 <code>beforeUnmount</code> 分支与 Composition 环境下的行为。
+        CDN 拉不到依赖时整页显示 SKIP。
+    </p>
+
+    <nav class="pages">
+        <a href="index.html">返回导航</a>
+        <a href="browser.html">UMD</a>
+        <a href="esm.html">ESM</a>
+        <a href="vue2.html">Vue 2</a>
+    </nav>
+
+    <div id="app">
+        <xq-video
+            url="./data/movie.mp4"
+            poster="./data/poster.jpg"
+            :width="720"
+            :height="405"
+            :barrages="[{ id: 1, name: '测试1', content: '来自 Vue 3' }]"
+        ></xq-video>
+    </div>
+
+    <div class="report" data-xq-report></div>
+
+    <script src="demo/check.js"></script>
+    <script src="demo/load-sfc.js"></script>
+    <script>
+        XqSfcRunner({
+            label: '3',
+            check: XQCheck,
+            vueGlobal: 'Vue',
+            loaderGlobal: 'vue3-sfc-loader',
+            vueUrls: [
+                'https://cdn.jsdelivr.net/npm/vue@3.4.38/dist/vue.global.prod.js',
+                'https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js',
+            ],
+            lessUrls: [
+                'https://cdn.jsdelivr.net/npm/less@4.2.0/dist/less.min.js',
+                'https://unpkg.com/less@4.2.0/dist/less.min.js',
+            ],
+            loaderUrls: [
+                'https://cdn.jsdelivr.net/npm/vue3-sfc-loader@0.9.5/dist/vue3-sfc-loader.js',
+                'https://unpkg.com/vue3-sfc-loader@0.9.5/dist/vue3-sfc-loader.js',
+            ],
+            bootstrap: function (Vue, component) {
+                XQCheck.assert('SFC 编译成功', function () {
+                    if (!component) throw new Error('组件为空');
+                });
+
+                var app = Vue.createApp({
+                    components: { 'xq-video': component },
+                });
+                var mounted = null;
+                app.config.errorHandler = function (err) {
+                    XQCheck.assert('挂载过程无 Vue 报错', function () {
+                        throw err;
+                    });
+                };
+                mounted = app.mount('#app');
+
+                XQCheck.assert('组件挂载成功', function () {
+                    if (!mounted || !document.querySelector('#app video')) {
+                        throw new Error('没有渲染出 video 节点');
+                    }
+                });
+                XQCheck.assert('图标用的是 xvicon 前缀', function () {
+                    var legacy = document.querySelector('#app .xqvideo-error');
+                    if (legacy) throw new Error('还存在旧的 xqvideo-* 图标类');
+                });
+                XQCheck.assert('share 缺依赖时不报错', function () {
+                    // xqshare 没装，点分享应当走提示而不是抛异常
+                    var shareBtn = document.querySelector('#app [title="分享"]');
+                    if (!shareBtn) throw new Error('找不到分享按钮');
+                    shareBtn.click();
+                });
+
+                app.unmount();
+                XQCheck.assert('unmount 后 body 上没有残留的滚动锁类', function () {
+                    if (document.body.classList.contains('xqvideo-lock-scroll')) {
+                        throw new Error('还有滚动锁');
+                    }
+                });
+                XQCheck.assert('unmount 后 DOM 已清空', function () {
+                    if (document.querySelector('#app video')) throw new Error('video 仍在');
+                });
+            },
+        });
+    </script>
+</body>
+
+</html>
