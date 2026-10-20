@@ -1,15 +1,64 @@
 {
     "name": "xqplayer",
-    "version": "0.0.7",
-    "description": "This is a simplify firendly video player.",
-    "main": "lib/vue/index.js",
+    "version": "0.1.0",
+    "description": "A simple, friendly HTML5 video player (UMD + ESM + Vue 2/3) with HLS/FLV and bullet-screen support.",
+    "main": "lib/js/xqplayer.js",
+    "module": "lib/js/xqplayer-esm.mjs",
+    "browser": "lib/js/xqplayer.js",
+    "unpkg": "lib/js/xqplayer.min.js",
+    "jsdelivr": "lib/js/xqplayer.min.js",
+    "types": "types/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./types/index.d.ts",
+            "import": "./lib/js/xqplayer-esm.mjs",
+            "require": "./lib/js/xqplayer.js",
+            "default": "./lib/js/xqplayer.js"
+        },
+        "./vue": {
+            "types": "./lib/vue/index.d.ts",
+            "import": "./lib/vue/index.js",
+            "default": "./lib/vue/index.js"
+        },
+        "./css/xqplayer.css": "./lib/css/xqplayer.css",
+        "./css/xqplayer.min.css": "./lib/css/xqplayer.min.css",
+        "./css/xqplayer-icon.css": "./lib/css/xqplayer-icon.css",
+        "./fonts/*": "./lib/fonts/*",
+        "./lib/*": "./lib/*",
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "lib/js",
+        "lib/css",
+        "lib/fonts",
+        "lib/vue",
+        "types",
+        "README.md",
+        "zh.md",
+        "CHANGELOG.md",
+        "LICENSE"
+    ],
+    "sideEffects": [
+        "*.css",
+        "./lib/vue/*"
+    ],
     "directories": {
         "lib": "lib",
         "test": "test"
     },
     "scripts": {
-        "test": "echo Error: no test specified && exit 1",
-        "test:browser": "live-server --host=localhost"
+        "build": "node scripts/build.mjs",
+        "check": "node scripts/build.mjs --check",
+        "pretest": "npm run check",
+        "test": "node --test \"test/unit/*.test.mjs\"",
+        "test:harness": "node scripts/dom-harness.mjs --all",
+        "serve": "node scripts/serve.mjs",
+        "test:browser": "node scripts/serve.mjs",
+        "prepublishOnly": "npm run build && npm test",
+        "release": "node scripts/release.mjs"
+    },
+    "engines": {
+        "node": ">=18.17"
     },
     "repository": {
         "type": "git",
@@ -17,6 +66,11 @@
     },
     "keywords": [
         "player",
+        "video",
+        "video-player",
+        "hls",
+        "flv",
+        "barrage",
         "xqplayer"
     ],
     "author": "gitguanqi",
@@ -26,8 +80,6 @@
     },
     "homepage": "https://github.com/gitguanqi/xqplayer#readme",
     "devDependencies": {
-        "less": "^4.1.3",
-        "less-loader": "^11.1.0",
-        "xqshare": "^0.0.5"
+        "esbuild": "^0.28.2"
     }
 }
