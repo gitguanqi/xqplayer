@@ -116,6 +116,30 @@ test('图标使用 xvicon 前缀且宿主必须引入主样式表', () => {
     );
 });
 
+test('悬浮弹层改用不冒泡的悬停事件并补齐连接区', () => {
+    for (const binding of [
+        '@mouseenter="showQualBar" @mouseleave="hideQualBar"',
+        '@mouseenter="showSpeedBar" @mouseleave="hideSpeedBar"',
+        '@mouseenter="showSetBar" @mouseleave="hideSetBar"',
+        '@mouseenter="showVolBar" @mouseleave="hideVolBar"',
+    ]) {
+        assert.ok(template.includes(binding), '缺少悬停绑定：' + binding);
+    }
+    assert.equal(/@mouseover="show(?:Qual|Speed|Set|Vol)Bar"/.test(template), false);
+    assert.equal(/@mouseout="hide(?:Qual|Speed|Set|Vol)Bar"/.test(template), false);
+
+    const less = styles.find((item) => /lang=['"]less['"]/.test(item.attrs));
+    assert.ok(less, '应有 less 样式块');
+    const bridge = /\.video-control-speed::before,[\s\S]*?\.video-control-volum::before\s*\{([\s\S]*?)\}/.exec(
+        less.body
+    );
+    assert.ok(bridge, '悬浮弹层缺少透明连接区');
+    assert.match(bridge[1], /position:\s*absolute/);
+    assert.match(bridge[1], /bottom:\s*-8px/);
+    assert.match(bridge[1], /height:\s*8px/);
+    assert.match(bridge[1], /content:\s*['"]{2}/);
+});
+
 test('存在 Vue 2 与 Vue 3 双卸载钩子', () => {
     assert.ok(/beforeUnmount\s*\(/.test(script), '应有 Vue 3 的 beforeUnmount');
     assert.ok(/beforeDestroy\s*\(/.test(script), '应有 Vue 2 的 beforeDestroy');

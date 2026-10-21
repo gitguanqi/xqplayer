@@ -683,6 +683,18 @@
   transition: all 0.5s;
 }
 
+/* Bridge the visual gap so moving from a trigger into its popup keeps hover active. */
+.xqvideo-box .video-info-box .video-control .video-control-btn .video-control-speed::before,
+.xqvideo-box .video-info-box .video-control .video-control-btn .video-control-set::before,
+.xqvideo-box .video-info-box .video-control .video-control-btn .video-control-volum::before {
+  position: absolute;
+  right: 0;
+  bottom: -8px;
+  left: 0;
+  height: 8px;
+  content: '';
+}
+
 .xqvideo-box .video-info-box.scale {
   position: fixed;
   top: 0;

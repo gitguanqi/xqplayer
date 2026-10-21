@@ -82,6 +82,26 @@ test('CSS 不再用写死的 right 偏移定位弹层', () => {
     assert.equal(/right:\s*(150|200|245)px/.test(css), false, '仍有硬编码的 right 偏移');
 });
 
+test('悬浮弹层用透明连接区跨过触发按钮与弹层之间的间隙', () => {
+    const css = readProjectFile('lib/css/xqplayer.css');
+    const popups = [
+        'video-control-speed',
+        'video-control-set',
+        'video-control-volum',
+    ];
+    for (const name of popups) {
+        assert.match(css, new RegExp('\\.' + name + '::before'));
+    }
+    const bridge = /\.video-control-speed::before,[\s\S]*?\.video-control-volum::before\s*\{([\s\S]*?)\}/.exec(
+        css
+    );
+    assert.ok(bridge, '悬浮弹层缺少透明连接区');
+    assert.match(bridge[1], /position:\s*absolute/);
+    assert.match(bridge[1], /bottom:\s*-8px/);
+    assert.match(bridge[1], /height:\s*8px/);
+    assert.match(bridge[1], /content:\s*['"]{2}/);
+});
+
 test('CSS 里窄屏档位真的会隐藏次要控件', () => {
     const css = readProjectFile('lib/css/xqplayer.css');
     assert.ok(/\.xqvideo-box\.xq-narrow[^{]*\.mobile-no\s*\{[^}]*display:\s*none/.test(css));

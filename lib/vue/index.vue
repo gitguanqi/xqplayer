@@ -59,14 +59,14 @@
                             <input @click="clickBarrage" type="text" placeholder="随便说点吧~" :disabled="!videoInfo.barrage" v-model="videoInfo.barrageContent" @keydown.enter="sendBarrage" maxlength="16">
                             <button class="send" :disabled="!videoInfo.barrageContent||!videoInfo.barrage" @click="sendBarrage">发送</button>
                         </div>
-                        <div class="video-control-alone mobile-no" @mouseover="showQualBar" @mouseout="hideQualBar">
+                        <div class="video-control-alone mobile-no" @mouseenter="showQualBar" @mouseleave="hideQualBar">
                             <button class="quality">{{ videoInfo.qualityText }}</button>
                             <div class="video-control-speed qua" v-show="videoInfo.isQuality">
                                 <span :class="{'active': videoInfo.quality === item.val}"
                                     v-for="item in videoInfo.qualities" :key="item.id">{{ item.name }}</span>
                             </div>
                         </div>
-                        <div class="video-control-alone mobile-no" @mouseover="showSpeedBar" @mouseout="hideSpeedBar">
+                        <div class="video-control-alone mobile-no" @mouseenter="showSpeedBar" @mouseleave="hideSpeedBar">
                             <button title="倍速">
                                 <i class="xvicon xvicon-dashboard"></i>
                             </button>
@@ -75,7 +75,7 @@
                                     :key="item.id" @click="toggleSpeed(item.val)">{{ item.name }}</span>
                             </div>
                         </div>
-                        <div class="video-control-alone" @mouseover="showSetBar" @mouseout="hideSetBar">
+                        <div class="video-control-alone" @mouseenter="showSetBar" @mouseleave="hideSetBar">
                             <button title="设置">
                                 <i class="xvicon xvicon-set"></i>
                             </button>
@@ -94,7 +94,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="video-control-alone vol" @mouseover="showVolBar" @mouseout="hideVolBar">
+                        <div class="video-control-alone vol" @mouseenter="showVolBar" @mouseleave="hideVolBar">
                             <button title="音量" @click="videoMuted">
                                 <i class="xvicon xvicon-volume" v-show="!videoInfo.muted"></i>
                                 <i class="xvicon xvicon-muted" v-show="videoInfo.muted"></i>
@@ -1407,6 +1407,17 @@
                         display: inline-flex;
                         align-items: center;
                         flex: 0 0 auto;
+                    }
+
+                    .video-control-speed::before,
+                    .video-control-set::before,
+                    .video-control-volum::before {
+                        position: absolute;
+                        right: 0;
+                        bottom: -8px;
+                        left: 0;
+                        height: 8px;
+                        content: '';
                     }
 
                     .video-control-speed {
