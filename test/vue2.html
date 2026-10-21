@@ -117,14 +117,18 @@
                     function () {
                         var shareBtn = first.$el.querySelector('[title="分享"]');
                         if (!shareBtn) throw new Error('找不到分享按钮');
+                        // 自检自动点击，压住弹层避免刷新时肉眼可见地闪一下
+                        document.body.setAttribute('data-xq-selfcheck', '');
                         shareBtn.click();
                         return new Promise(function (resolve, reject) {
                             setTimeout(function () {
                                 if (!document.querySelector('body > .xqvideo-share-host .xqshare')) {
+                                    document.body.removeAttribute('data-xq-selfcheck');
                                     reject(new Error('没有渲染出分享弹层'));
                                     return;
                                 }
                                 shareBtn.click();
+                                document.body.removeAttribute('data-xq-selfcheck');
                                 resolve();
                             }, 80);
                         });

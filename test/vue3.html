@@ -101,15 +101,19 @@
                     XqLoadShare(),
                     function () {
                         var shareBtn = document.querySelector('#app [title="分享"]');
+                        // 自检自动点击，压住弹层避免刷新时肉眼可见地闪一下
+                        document.body.setAttribute('data-xq-selfcheck', '');
                         shareBtn.click();
                         return new Promise(function (resolve, reject) {
                             setTimeout(function () {
                                 if (!document.querySelector('body > .xqvideo-share-host .xqshare')) {
+                                    document.body.removeAttribute('data-xq-selfcheck');
                                     reject(new Error('没有渲染出分享弹层'));
                                     return;
                                 }
-                                // 验完就收起来，页面留给播放器本身
+                                // 验完就收起来，页面留给播放器本身（关闭后再解除压制）
                                 shareBtn.click();
+                                document.body.removeAttribute('data-xq-selfcheck');
                                 resolve();
                             }, 80);
                         });

@@ -127,14 +127,20 @@
             if (!window.XqShare) throw new Error(window.__xqShareError || '未取到 XqShare');
         });
         XQCheck.after('点击分享能弹出弹层', XqLoadShare(), function () {
-            var widget = a.shareVideo();
-            if (!widget) throw new Error('没有创建出分享实例');
-            if (!document.querySelector('#playerA .xqshare')) {
-                throw new Error('弹层没渲染到播放器里');
+            // 自检自动点击，压住弹层避免刷新时肉眼可见地闪一下
+            document.body.setAttribute('data-xq-selfcheck', '');
+            try {
+                var widget = a.shareVideo();
+                if (!widget) throw new Error('没有创建出分享实例');
+                if (!document.querySelector('#playerA .xqshare')) {
+                    throw new Error('弹层没渲染到播放器里');
+                }
+                if (widget.visible !== true) throw new Error('弹层未显示');
+                // 验完收起来，页面留给播放器本身
+                widget.hide();
+            } finally {
+                document.body.removeAttribute('data-xq-selfcheck');
             }
-            if (widget.visible !== true) throw new Error('弹层未显示');
-            // 验完收起来，页面留给播放器本身
-            widget.hide();
         });
     </script>
 </body>
