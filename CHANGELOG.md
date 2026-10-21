@@ -41,6 +41,14 @@
 - 样式自洽：`box-sizing` 与按钮外观重置收进 `.xqvideo-box` 作用域，宿主有没有全局 reset 都不再影响外观
   （此前裸 `<button>` 会露出浏览器原生边框与底色）。
 - Vue 空壳组件：`render()` 不再假设第一个参数是 `h`（Vue 3 传的是实例），改为两个版本都安全的空渲染。
+- 分享按钮真的能用了：`xqshare` 重新作为依赖引入（`dependencies`），播放器按三条路解析构造器 ——
+  `options.share` > `XQVideoPlayer.useShare()` > `window.XqShare`；
+  点击创建实例并 `show()`，再次点击走 `toggle()` 而不是重复 new，`destroy()` 时连带销毁。
+  缺失时仍只是提示，不抛错。
+- Vue 组件：`shareComponent` 不再只有空壳，`window.XqShare` 存在时把 UMD 构造器包成组件
+  （自己建宿主、同步 `show`/`url`/`title`、卸载时 destroy）；`share-resolver` 仍可传入 `xqshare/vue` 的组件。
+  点分享时才解析，兼容 xqshare 异步加载。
+- 弹幕/分享相关的窄宽度与首帧问题一并修掉：`title`、`share` 进入默认参数表，`destroy()` 幂等清理分享实例。
 
 ### 工程化
 
@@ -49,7 +57,7 @@
 - `package.json` 补全 `module` / `browser` / `unpkg` / `jsdelivr` / `exports` / `types` / `files` / `sideEffects`；
   `files` 让发包体积从约 860KB 降到约 215KB（不再带上 `test/data`）。
 - 手写类型声明：`types/index.d.ts` 与 `lib/vue/index.d.ts`。
-- 测试：52 条 `node:test` 断言 + 12 个基于桩 DOM 的行为场景 + 5 个浏览器自检页
+- 测试：59 条 `node:test` 断言 + 12 个基于桩 DOM 的行为场景 + 5 个浏览器自检页
   （UMD / ESM / Vue 2 / Vue 3 / 导航），并新增零依赖静态服务器（支持 HTTP Range）。
 - 删除 `deploy.sh` 的 `git push -f`，改为 `npm run release` —— 前置检查、普通推送、支持 `--dry-run`。
 

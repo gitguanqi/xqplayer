@@ -86,6 +86,8 @@ The Vue component ships as an `.vue` SFC, so you need `vue-loader` or `@vitejs/p
 | `mode` | `'mp4' \| 'm3u8' \| 'flv'` | `'mp4'` | no | Source type |
 | `width` | `number \| string` | `1200` | no | Width |
 | `height` | `number \| string` | `600` | no | Height |
+| `title` | `string` | `''` | no | Share title (defaults to `document.title`) |
+| `share` | `Function` | `null` | no | xqshare constructor for this instance |
 
 Only `el` and `url` are required. Everything else is optional — including `poster`.
 
@@ -96,23 +98,54 @@ are scoped to the player — your page's own styles are left alone.
 
 ## Optional external dependencies
 
-The core player has zero runtime dependencies, but certain formats need extra libraries.
-They are **not** bundled — you load them yourself, and the player detects them at runtime.
-If a library is missing the player shows an error state instead of throwing.
+The player bundle has no runtime dependencies of its own — libraries are **not** bundled into
+`xqplayer`. Each is detected at runtime, and a missing one only degrades that one feature
+(error state for HLS/FLV, a toast for share) instead of throwing.
 
-| Feature | Required library | Global it must expose |
+| Feature | Required library | Detected as |
 | --- | --- | --- |
 | m3u8 / HLS | [hls.js](https://github.com/video-dev/hls.js) | `window.Hls` |
 | flv | [flv.js](https://github.com/bilibili/flv.js) | `window.flvjs` |
-| Share popup | `xqshare` (or your own component) | `window.XqShare` |
+| Share popup | [`xqshare`](https://www.npmjs.com/package/xqshare) | `window.XqShare`, or injected |
 
 ```html
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.0.8/hls.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.6.1/flv.min.js"></script>
 ```
 
-In Vue, the share component can also be supplied explicitly through the `share-resolver` prop,
-which removes the global dependency entirely.
+### Enabling the share button
+
+`xqshare` is a declared dependency, so `npm i xqplayer` already installs it — but the player
+will not inject it for you. Pick whichever matches your setup:
+
+```html
+<!-- 1. plain <script>: xqshare ships a UMD build, plus its own stylesheet -->
+<link rel="stylesheet" href="./node_modules/xqshare/lib/css/xqshare.min.css">
+<script src="./node_modules/xqshare/lib/js/xqshare.min.js"></script>
+```
+
+```js
+// 2. bundler: register the constructor once
+import XQShare from 'xqshare';
+import 'xqshare/css/xqshare.min.css';
+import XQVideoPlayer from 'xqplayer';
+
+XQVideoPlayer.useShare(XQShare);
+// or per instance: new XQVideoPlayer({ ..., share: XQShare })
+```
+
+```vue
+<!-- 3. Vue: pass the component directly, no global needed -->
+<script>
+import { component as XQShare } from 'xqshare/vue';
+export default { data: () => ({ resolveShare: () => XQShare }) };
+</script>
+
+<xq-video url="./movie.mp4" :share-resolver="resolveShare" />
+```
+
+Without any of these the share icon still works — it just shows a "share component not loaded"
+toast and logs a warning.
 
 ## Instance API
 
@@ -126,7 +159,8 @@ player.setStatus('hello');   // transient status hint
 player.reload();             // reload the current source
 player.loadVideo({ url: './another.mp4' });
 player.secondToTime(3661);   // '01:01:01'
-player.destroy();            // remove DOM, detach every listener, destroy hls/flv
+player.shareVideo();         // open the share popup, returns the xqshare instance (or null)
+player.destroy();            // remove DOM, detach listeners, destroy hls/flv + share widget
 ```
 
 Multiple instances on one page are fully isolated — each player scopes DOM lookups to its own
@@ -149,7 +183,7 @@ instance are all released. Call it before you remove the container in an SPA.
 ```sh
 npm run build          # regenerate lib/ artifacts from src/
 npm run check          # fail if lib/ artifacts are out of sync with src/
-npm test               # node:test unit suite (52 assertions)
+npm test               # node:test unit suite (59 assertions)
 npm run test:harness   # behavioural regression against a stub DOM
 npm run serve          # serve test/ pages at http://localhost:5173
 npm run release patch  # version bump + build + test + tag + push (no force push)

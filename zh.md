@@ -86,6 +86,8 @@ createApp(App).use(xqVideo).mount('#app');
 | `mode` | `'mp4' \| 'm3u8' \| 'flv'` | `'mp4'` | 否 | 播放类型 |
 | `width` | `number \| string` | `1200` | 否 | 宽度 |
 | `height` | `number \| string` | `600` | 否 | 高度 |
+| `title` | `string` | `''` | 否 | 分享标题，缺省用 `document.title` |
+| `share` | `Function` | `null` | 否 | 该实例使用的 xqshare 构造器 |
 
 只有 `el` 和 `url` 是必填，`poster` 自 0.1.0 起真正可选。
 
@@ -95,21 +97,52 @@ createApp(App).use(xqVideo).mount('#app');
 
 ## 可选的外部依赖
 
-核心播放器零运行时依赖，但特定格式需要额外库。**这些库不随包一起发布**，需要你自己引入；
-播放器会在运行时探测它们，缺失时进入错误态并给出提示，而不是抛 ReferenceError。
+播放器产物本身零运行时依赖，这些库**不会被打进 `xqplayer`**。播放器在运行时探测它们，
+缺哪个就只降级哪个能力（HLS/FLV 进错误态，分享给一句提示），不会抛 ReferenceError。
 
-| 能力 | 需要的库 | 必须挂到的全局名 |
+| 能力 | 需要的库 | 探测方式 |
 | --- | --- | --- |
 | m3u8 / HLS | [hls.js](https://github.com/video-dev/hls.js) | `window.Hls` |
 | flv | [flv.js](https://github.com/bilibili/flv.js) | `window.flvjs` |
-| 分享弹层 | `xqshare`（或你自己的组件） | `window.XqShare` |
+| 分享弹层 | [`xqshare`](https://www.npmjs.com/package/xqshare) | `window.XqShare` 或主动注入 |
 
 ```html
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.0.8/hls.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.6.1/flv.min.js"></script>
 ```
 
-Vue 组件里也可以通过 `share-resolver` 属性显式传入分享组件，这样就完全不需要全局变量了。
+### 让分享按钮真正可用
+
+`xqshare` 已是本包的声明式依赖，`npm i xqplayer` 会一并装上，但播放器不会替你注入它。
+按你的场景三选一：
+
+```html
+<!-- 1. 直接 <script>：xqshare 有 UMD 产物，样式要单独引 -->
+<link rel="stylesheet" href="./node_modules/xqshare/lib/css/xqshare.min.css">
+<script src="./node_modules/xqshare/lib/js/xqshare.min.js"></script>
+```
+
+```js
+// 2. 打包器：注册一次构造器
+import XQShare from 'xqshare';
+import 'xqshare/css/xqshare.min.css';
+import XQVideoPlayer from 'xqplayer';
+
+XQVideoPlayer.useShare(XQShare);
+// 也可以只给某个实例：new XQVideoPlayer({ ..., share: XQShare })
+```
+
+```vue
+<!-- 3. Vue：直接传组件，不需要任何全局变量 -->
+<script>
+import { component as XQShare } from 'xqshare/vue';
+export default { data: () => ({ resolveShare: () => XQShare }) };
+</script>
+
+<xq-video url="./movie.mp4" :share-resolver="resolveShare" />
+```
+
+三条都不做时分享图标也不会报错，只是弹一句「分享组件未加载」并在控制台 warn。
 
 ## 实例方法
 
@@ -123,7 +156,8 @@ player.setStatus('提示文案');  // 短暂提示
 player.reload();             // 重新加载当前源
 player.loadVideo({ url: './another.mp4' });
 player.secondToTime(3661);   // '01:01:01'
-player.destroy();            // 移除 DOM、摘掉所有监听、销毁 hls/flv 实例
+player.shareVideo();         // 打开分享弹层，返回 xqshare 实例（不可用时为 null）
+player.destroy();            // 移除 DOM、摘掉监听、销毁 hls/flv 与分享实例
 ```
 
 同页面可以放多个实例，互不影响：每个播放器只从自己的根节点里找节点（没有写死的 id），
@@ -146,7 +180,7 @@ player.destroy();            // 移除 DOM、摘掉所有监听、销毁 hls/flv
 ```sh
 npm run build          # 由 src/ 重新生成 lib/ 下的产物
 npm run check          # 产物与源码不一致时报错退出
-npm test               # node:test 单元测试（52 条断言）
+npm test               # node:test 单元测试（59 条断言）
 npm run test:harness   # 基于桩 DOM 的行为回归
 npm run serve          # 启动测试页 http://localhost:5173
 npm run release patch  # 升版本 + 构建 + 测试 + 打 tag + 推送（不使用强推）
