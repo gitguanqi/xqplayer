@@ -264,8 +264,9 @@
                     url: '',
                     poster: '',
                     mode: 'mp4', // 'mp4', 'flv', 'm3u8'
-                    width: 0,
-                    height: 0,
+                    // 首帧就用 props 的宽高，避免 mounted 之前渲染成 width: 0px
+                    width: this.width,
+                    height: this.height,
                 },
                 share: {
                     url: '',
