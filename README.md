@@ -89,6 +89,11 @@ The Vue component ships as an `.vue` SFC, so you need `vue-loader` or `@vitejs/p
 
 Only `el` and `url` are required. Everything else is optional — including `poster`.
 
+The control bar adapts to `width` on its own: below 680px it drops the quality and
+speed menus, below 520px it also drops the bullet-screen input, so the remaining
+buttons never wrap or overlap. `<style>` resets (`box-sizing`, button appearance)
+are scoped to the player — your page's own styles are left alone.
+
 ## Optional external dependencies
 
 The core player has zero runtime dependencies, but certain formats need extra libraries.
@@ -144,7 +149,7 @@ instance are all released. Call it before you remove the container in an SPA.
 ```sh
 npm run build          # regenerate lib/ artifacts from src/
 npm run check          # fail if lib/ artifacts are out of sync with src/
-npm test               # node:test unit suite (44 assertions)
+npm test               # node:test unit suite (52 assertions)
 npm run test:harness   # behavioural regression against a stub DOM
 npm run serve          # serve test/ pages at http://localhost:5173
 npm run release patch  # version bump + build + test + tag + push (no force push)

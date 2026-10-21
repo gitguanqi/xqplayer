@@ -33,6 +33,14 @@
   `$route` 改为带守卫的 `routeType` 计算属性；两处 `addEventListener` 的普通 `function` 回调改箭头函数；
   `document.body.className` 改为只增删自己的滚动锁类；checkbox id 按实例唯一化；
   新增 `beforeUnmount`(Vue 3) / `beforeDestroy`(Vue 2) 双钩子与共用的 `teardown()`。
+- 控制条布局：左侧时间不再被 flex 压缩换行到播放按钮下方；弹幕行的「发送」不再掉到第二行
+  （输入框改为可收缩 + 按钮不参与收缩）。
+- 弹层定位：音量、倍速、清晰度、设置面板原先各自写死 `right: 150px/200px/245px`（相对整条控制条），
+  图标一增减就整体偏移；现在锚定到各自的 `.video-control-alone`，用 `left: 50%` + `translateX(-50%)` 居中。
+- 窄实例：按 `width` 分级（<680 收起清晰度/倍速，<520 再收起弹幕输入），480px 实例的图标不再被压到 17px。
+- 样式自洽：`box-sizing` 与按钮外观重置收进 `.xqvideo-box` 作用域，宿主有没有全局 reset 都不再影响外观
+  （此前裸 `<button>` 会露出浏览器原生边框与底色）。
+- Vue 空壳组件：`render()` 不再假设第一个参数是 `h`（Vue 3 传的是实例），改为两个版本都安全的空渲染。
 
 ### 工程化
 
@@ -41,7 +49,7 @@
 - `package.json` 补全 `module` / `browser` / `unpkg` / `jsdelivr` / `exports` / `types` / `files` / `sideEffects`；
   `files` 让发包体积从约 860KB 降到约 215KB（不再带上 `test/data`）。
 - 手写类型声明：`types/index.d.ts` 与 `lib/vue/index.d.ts`。
-- 测试：44 条 `node:test` 断言 + 12 个基于桩 DOM 的行为场景 + 5 个浏览器自检页
+- 测试：52 条 `node:test` 断言 + 12 个基于桩 DOM 的行为场景 + 5 个浏览器自检页
   （UMD / ESM / Vue 2 / Vue 3 / 导航），并新增零依赖静态服务器（支持 HTTP Range）。
 - 删除 `deploy.sh` 的 `git push -f`，改为 `npm run release` —— 前置检查、普通推送、支持 `--dry-run`。
 

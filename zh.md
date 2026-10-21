@@ -89,6 +89,10 @@ createApp(App).use(xqVideo).mount('#app');
 
 只有 `el` 和 `url` 是必填，`poster` 自 0.1.0 起真正可选。
 
+控制条会按 `width` 自己调整：小于 680px 收起清晰度与倍速菜单，小于 520px 再收起弹幕输入框，
+保证剩下的按钮不换行、不互相覆盖。样式里的 `box-sizing` 与按钮外观重置都限定在播放器内部，
+不会污染宿主页面。
+
 ## 可选的外部依赖
 
 核心播放器零运行时依赖，但特定格式需要额外库。**这些库不随包一起发布**，需要你自己引入；
@@ -142,7 +146,7 @@ player.destroy();            // 移除 DOM、摘掉所有监听、销毁 hls/flv
 ```sh
 npm run build          # 由 src/ 重新生成 lib/ 下的产物
 npm run check          # 产物与源码不一致时报错退出
-npm test               # node:test 单元测试（44 条断言）
+npm test               # node:test 单元测试（52 条断言）
 npm run test:harness   # 基于桩 DOM 的行为回归
 npm run serve          # 启动测试页 http://localhost:5173
 npm run release patch  # 升版本 + 构建 + 测试 + 打 tag + 推送（不使用强推）
