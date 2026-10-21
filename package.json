@@ -1,6 +1,6 @@
 {
     "name": "xqplayer",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "A simple, friendly HTML5 video player (UMD + ESM + Vue 2/3) with HLS/FLV and bullet-screen support.",
     "main": "lib/js/xqplayer.js",
     "module": "lib/js/xqplayer-esm.mjs",
