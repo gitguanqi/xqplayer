@@ -34,6 +34,7 @@
             :barrages="[{ id: 1, name: '测试1', content: '来自 Vue 3' }]"
         ></xq-video>
     </div>
+    <div id="probe" hidden></div>
 
     <div class="report" data-xq-report></div>
 
@@ -89,14 +90,23 @@
                     shareBtn.click();
                 });
 
-                app.unmount();
+                // 卸载验证用一次性探针应用，主应用保留在页面上展示完整效果
+                var probeApp = Vue.createApp({
+                    components: { 'xq-video': component },
+                    template: '<xq-video url="./data/movie.mp4" :width="480" :height="270"></xq-video>',
+                });
+                probeApp.mount('#probe');
+                probeApp.unmount();
                 XQCheck.assert('unmount 后 body 上没有残留的滚动锁类', function () {
                     if (document.body.classList.contains('xqvideo-lock-scroll')) {
                         throw new Error('还有滚动锁');
                     }
                 });
                 XQCheck.assert('unmount 后 DOM 已清空', function () {
-                    if (document.querySelector('#app video')) throw new Error('video 仍在');
+                    if (document.querySelector('#probe video')) throw new Error('video 仍在');
+                });
+                XQCheck.assert('unmount 探针后主应用不受影响', function () {
+                    if (!document.querySelector('#app video')) throw new Error('主应用被误伤');
                 });
             },
         });

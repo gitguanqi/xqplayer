@@ -70,9 +70,20 @@
             probe.destroy();
         });
 
-        player.destroy();
+        // destroy 验证改用一次性实例，player 保留在页面上展示完整效果
+        var disposable = new XQVideoPlayer({
+            el: '#probeHost',
+            url: './data/movie.mp4',
+            mode: 'mp4',
+            width: 480,
+            height: 270,
+        });
+        disposable.destroy();
         XQCheck.assert('destroy 后容器被清空', function () {
-            if (document.querySelector('#playerA .xqvideo-box')) throw new Error('DOM 仍在');
+            if (document.querySelector('#probeHost .xqvideo-box')) throw new Error('DOM 仍在');
+        });
+        XQCheck.assert('destroy 后主实例依旧可用', function () {
+            if (!player.root) throw new Error('player 被误伤');
         });
     </script>
 </body>

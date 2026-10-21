@@ -14,7 +14,7 @@
     <h1>Vue 2 组件自检</h1>
     <p class="lead">
         运行时编译 <code>lib/vue/index.vue</code> 并挂载，验证插件 install、props 与多实例。
-        CDN 拉不到依赖时整页显示 SKIP。
+        依赖只有 Vue 与 less 两个 CDN；拉不到时整页显示 SKIP。
     </p>
 
     <nav class="pages">
@@ -45,7 +45,6 @@
             label: '2',
             check: XQCheck,
             vueGlobal: 'Vue',
-            loaderGlobal: 'vue2-sfc-loader',
             vueUrls: [
                 'https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.min.js',
                 'https://unpkg.com/vue@2.7.16/dist/vue.min.js',
@@ -54,10 +53,10 @@
                 'https://cdn.jsdelivr.net/npm/less@4.2.0/dist/less.min.js',
                 'https://unpkg.com/less@4.2.0/dist/less.min.js',
             ],
-            loaderUrls: [
-                'https://cdn.jsdelivr.net/npm/vue2-sfc-loader@0.9.5/dist/vue2-sfc-loader.js',
-                'https://unpkg.com/vue2-sfc-loader@0.9.5/dist/vue2-sfc-loader.js',
-            ],
+            // vue2-sfc-loader 在 npm 上只发布了 package.json（没有 dist），CDN 必然 404，
+            // 所以 Vue 2 页直接走 demo/load-sfc.js 自带的极简 SFC 编译器
+            loaderUrls: [],
+            loaderGlobal: '',
             bootstrap: function (Vue, component) {
                 XQCheck.assert('SFC 编译成功', function () {
                     if (!component) throw new Error('组件为空');
@@ -95,12 +94,15 @@
                 });
                 XQCheck.equal('secondToTime(65)', first.secondToTime(65), '00:01:05');
 
-                // 卸载也要干净
-                first.teardown();
+                // 卸载验证用第二个实例，第一个保留在页面上展示完整效果
+                second.teardown();
                 XQCheck.assert('teardown 后 body 上没有残留的滚动锁类', function () {
                     if (document.body.classList.contains('xqvideo-lock-scroll')) {
                         throw new Error('还有滚动锁');
                     }
+                });
+                XQCheck.assert('teardown 后第一个实例不受影响', function () {
+                    if (!first.$el || !first.$el.querySelector('video')) throw new Error('第一个实例被误伤');
                 });
             },
         });

@@ -29,6 +29,8 @@
     <h3>实例 B</h3>
     <div class="player-host" id="playerB"></div>
 
+    <div class="player-host" id="tmpHost" hidden></div>
+
     <div class="report" data-xq-report></div>
 
     <script src="demo/check.js"></script>
@@ -101,14 +103,21 @@
             if (a.refs.barrageList.textContent.indexOf('<img') === -1) throw new Error('内容丢失');
         });
 
-        // destroy 必须从 DOM 里摘干净
-        a.destroy();
-        XQCheck.assert('destroy 后节点已移除', function () {
-            if (a.root) throw new Error('root 未置空');
-            if (document.querySelector('#playerA .xqvideo-box')) throw new Error('DOM 仍在');
+        // destroy 演示：用一次性实例验证，A/B 保留在页面上展示完整效果
+        var tmp = new XQVideoPlayer({
+            el: '#tmpHost',
+            url: './data/movie.mp4',
+            mode: 'mp4',
+            width: 480,
+            height: 270,
         });
-        XQCheck.assert('destroy 后 B 依旧可用', function () {
-            if (!b.root) throw new Error('B 被误伤');
+        tmp.destroy();
+        XQCheck.assert('destroy 后节点已移除', function () {
+            if (tmp.root) throw new Error('root 未置空');
+            if (document.querySelector('#tmpHost .xqvideo-box')) throw new Error('DOM 仍在');
+        });
+        XQCheck.assert('destroy 后 A 依旧可用', function () {
+            if (!a.root) throw new Error('A 被误伤');
         });
     </script>
 </body>
