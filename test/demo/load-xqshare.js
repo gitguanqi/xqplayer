@@ -5,7 +5,7 @@
  * 加载失败不会让页面报错 —— 播放器会降级成一句提示，这正是要验的行为之一。
  */
 (function () {
-    var VERSION = '0.1.0';
+    var VERSION = '0.1.2';
     var LOCAL = '../node_modules/xqshare/lib';
     var CDNS = ['https://cdn.jsdelivr.net/npm/xqshare@' + VERSION, 'https://unpkg.com/xqshare@' + VERSION];
 

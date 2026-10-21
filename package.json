@@ -83,6 +83,6 @@
         "esbuild": "^0.28.2"
     },
     "dependencies": {
-        "xqshare": "^0.1.0"
+        "xqshare": "^0.1.2"
     }
 }
