@@ -1,5 +1,5 @@
 <template>
-    <div class="xqvideo-box" :style="{'width': videoInfo.width+'px', 'height': videoInfo.height+'px'}">
+    <div class="xqvideo-box" :class="boxClass" :style="{'width': videoInfo.width+'px', 'height': videoInfo.height+'px'}">
         <div :class="{'video-info-box': true, 'scale': videoInfo.scale, 'draw': videoInfo.isDraw} " @mouseover="toggleControl(true)"  @mouseout="toggleControl(false)">
             <video ref="video" tabindex="-1" preload="auto" @click="playVideo"></video>
             <div :class="{'video-loading': true, 'video-loading-text': videoInfo.error}" v-if="videoInfo.loading">
@@ -143,13 +143,10 @@
             url: { type: String, default: '' },
             title: { type: String, default: '' },
         },
-        render(h) {
-            // Vue 3 把 h 作为参数传入，Vue 2 挂在 this.$createElement；两种都能取到
-            const create = h || this.$createElement;
-            if (!create) {
-                return null;
-            }
-            return create('i', { style: { display: 'none' } });
+        render() {
+            // Vue 3 的 render 不再传 h（需要从 vue 里 import），Vue 2 返回 null 会渲染空 vnode；
+            // 直接返回 null 在两个版本下都是安全的空渲染
+            return null;
         },
     };
 
@@ -290,6 +287,17 @@
             },
         },
         computed: {
+            // 控制条内容比视频宽度更宽时按档位收起次要控件，避免图标被挤出/互相覆盖
+            boxClass() {
+                const w = Number(this.videoInfo.width) || 1200;
+                if (w < 520) {
+                    return { 'xq-compact': true };
+                }
+                if (w < 680) {
+                    return { 'xq-narrow': true };
+                }
+                return {};
+            },
             // 未安装 vue-router 时返回 undefined，不再抛错
             routeType() {
                 return this.$route && this.$route.query ? this.$route.query.type : undefined;
@@ -903,6 +911,50 @@
     @c: #ccc;
     .xqvideo-box {
         position: relative;
+
+        /* 窄播放器：按实例宽度逐级收起次要控件 */
+        &.xq-narrow .video-info-box .video-control .video-control-btn .mobile-no,
+        &.xq-compact .video-info-box .video-control .video-control-btn .mobile-no {
+            display: none;
+        }
+
+        &.xq-compact .video-control .video-control-barrage {
+            padding-left: 12px;
+            padding-right: 4px;
+        }
+
+        &.xq-compact .video-control .video-control-barrage input {
+            display: none;
+        }
+
+        /* 组件自成一体：不依赖宿主页面的 reset（box-sizing 与按钮外观） */
+        &,
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        button {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: none;
+            font: inherit;
+            color: inherit;
+            appearance: none;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        input {
+            font: inherit;
+            outline: none;
+            border: 0;
+        }
+
         .video-info-box {
             position: relative;
             box-sizing: border-box;
@@ -1111,11 +1163,18 @@
                 .video-control-right {
                     display: flex;
                     align-items: center;
+                    justify-content: flex-end;
+                    flex: 1 1 auto;
+                    min-width: 0;
+                    flex-wrap: nowrap;
                 }
 
                 .video-control-barrage {
                     position: relative;
-                    display: inline-block;
+                    display: flex;
+                    align-items: center;
+                    flex: 0 1 auto;
+                    min-width: 0;
                     padding-left: 30px;
                     padding-right: 10px;
                     width: auto;
@@ -1123,10 +1182,11 @@
                     font-size: 13px;
                     .switch {
                         display: inline-block;
-                        padding: 4px;
-                        width: 15px;
-                        height: 15px;
-                        line-height: 15px;
+                        flex: 0 0 auto;
+                        padding: 0;
+                        width: 25px;
+                        height: 25px;
+                        line-height: 23px;
                         cursor: pointer;
                         color: @f8;
                         text-align: center;
@@ -1141,9 +1201,11 @@
                     }
                     input {
                         box-sizing: border-box;
-                        margin-left: 10px;
+                        flex: 1 1 120px;
+                        min-width: 70px;
+                        width: auto;
+                        margin-left: 8px;
                         padding-left: 10px;
-                        width: 200px;
                         height: 25px;
                         background: fadeout(@white, 80);
                         color: @white;
@@ -1152,9 +1214,12 @@
                         }
                     }
                     .send {
+                        flex: 0 0 auto;
+                        position: relative;
+                        margin-left: 2px;
                         width: 50px;
                         height: 25px;
-                        line-height: 20px;
+                        line-height: 25px;
                         font-size: 14px;
                         color: @f8;
                         background: fadeout(@white, 80);
@@ -1181,10 +1246,20 @@
                     margin-top: 3px;
                     padding: 0 5px;
                     height: 42px;
+                    min-width: 0;
+                    flex-wrap: nowrap;
+
+                    .video-control-left {
+                        display: flex;
+                        align-items: center;
+                        flex: 0 0 auto;
+                        white-space: nowrap;
+                    }
 
                     button,
                     a {
                         display: inline-block;
+                        flex: 0 0 auto;
                         width: 35px;
                         height: 30px;
                         line-height: 30px;
@@ -1213,16 +1288,22 @@
                         margin-left: 5px;
                         color: @c;
                         font-size: 14px;
+                        white-space: nowrap;
                     }
 
                     .video-control-alone {
-                        display: inline-block;
+                        position: relative;
+                        display: inline-flex;
+                        align-items: center;
+                        flex: 0 0 auto;
                     }
 
                     .video-control-speed {
                         position: absolute;
-                        bottom: 45px;
-                        right: 200px;
+                        bottom: calc(100% + 8px);
+                        left: 50%;
+                        right: auto;
+                        transform: translateX(-50%);
                         box-sizing: border-box;
                         padding: 10px;
                         width: 70px;
@@ -1232,7 +1313,7 @@
                         font-size: 14px;
                         line-height: 1.8;
                         text-align: center;
-                        z-index: 2;
+                        z-index: 9;
 
                         span {
                             cursor: pointer;
@@ -1245,16 +1326,14 @@
                                 color: @mainColor;
                             }
                         }
-
-                        &.qua {
-                            right: 245px;
-                        }
                     }
 
                     .video-control-set {
                         position: absolute;
-                        bottom: 45px;
-                        right: 145px;
+                        bottom: calc(100% + 8px);
+                        left: 50%;
+                        right: auto;
+                        transform: translateX(-50%);
                         box-sizing: border-box;
                         padding: 10px;
                         width: auto;
@@ -1263,7 +1342,8 @@
                         color: @white;
                         font-size: 12px;
                         border-radius: 5px;
-                        z-index: 2;
+                        white-space: nowrap;
+                        z-index: 9;
 
                         p {
                             display: flex;
@@ -1309,8 +1389,10 @@
 
                     .video-control-volum {
                         position: absolute;
-                        right: 150px;
-                        bottom: 40px;
+                        left: 50%;
+                        right: auto;
+                        bottom: calc(100% + 8px);
+                        transform: translateX(-50%);
                         display: flex;
                         justify-content: center;
                         align-items: center;
@@ -1318,6 +1400,7 @@
                         height: 100px;
                         background: fadeout(@black, 30);
                         border-radius: 5px;
+                        z-index: 9;
 
                         span {
                             position: relative;
@@ -1496,11 +1579,7 @@
     }
 
     @media all and (max-width: 768px) {
-        .video-info {
-            padding: 0;
-            border-top: 1px solid @c;
-            flex-direction: column;
-
+        .xqvideo-box {
             .video-info-box {
                 height: 210px;
 
@@ -1528,6 +1607,15 @@
                             font-size: 30px;
                             color: @white;
                         }
+                    }
+
+                    /* 小屏收起清晰度/倍速，保证弹幕行不换行 */
+                    .mobile-no {
+                        display: none;
+                    }
+
+                    .video-control-barrage input {
+                        min-width: 60px;
                     }
                 }
             }
