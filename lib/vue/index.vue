@@ -130,10 +130,10 @@
 
 <script>
     let instanceSeq = 0;
+    let shareSeq = 0;
 
     /**
-     * 分享组件空壳。xqshare 不再是硬依赖：宿主可通过 `share-resolver` 传入自己的分享组件，
-     * 也可以用 CDN 挂到 window.XqShare，两者都没有时用它兜底，不渲染任何东西。
+     * 分享组件空壳。三条路都走不通时用它兜底：不渲染任何东西，也不抛错。
      */
     const XQ_SHARE_STUB = {
         name: 'xq-share-stub',
@@ -149,6 +149,114 @@
             return null;
         },
     };
+
+    /**
+     * 把 xqshare 的 UMD 构造器包成一个 Vue 组件。
+     *
+     * xqshare 的 Vue 入口（`xqshare/vue`）内部 `import './xqshare.vue'`，只有打包器能用，
+     * 这里发布的是未编译的 SFC，静态 import 会让没有 SFC loader 的环境直接挂掉。
+     * 所以走 UMD：`new XqShare({ el, type, url, title })`，自己管理 show/hide 与销毁，
+     * Vue 2 与 Vue 3 都能挂载（渲染空节点，宿主元素挂在 body 上）。
+     */
+    function createShareComponent(Ctor) {
+        return {
+            name: 'xq-share',
+            props: {
+                type: { type: String, default: 'pop' },
+                show: { type: Boolean, default: false },
+                url: { type: String, default: '' },
+                title: { type: String, default: '' },
+            },
+            watch: {
+                show: 'syncShare',
+                url: 'syncShare',
+                title: 'syncShare',
+            },
+            mounted() {
+                this.syncShare();
+            },
+            beforeUnmount() {
+                this.disposeShare();
+            },
+            beforeDestroy() {
+                this.disposeShare();
+            },
+            methods: {
+                syncShare() {
+                    if (typeof document === 'undefined' || !this.show) {
+                        if (this.shareWidget && typeof this.shareWidget.hide === 'function') {
+                            this.shareWidget.hide();
+                        }
+                        return;
+                    }
+                    this.ensureHost();
+                    if (this.shareWidget) {
+                        if (typeof this.shareWidget.setUrl === 'function') {
+                            this.shareWidget.setUrl(this.url, this.title);
+                        }
+                        this.shareWidget.show();
+                        return;
+                    }
+                    try {
+                        this.shareWidget = new Ctor({
+                            el: this.shareHost,
+                            type: this.type,
+                            url: this.url,
+                            title: this.title,
+                        });
+                        this.shareWidget.show();
+                    } catch (e) {
+                        // 构造失败不能让组件崩掉
+                        this.shareWidget = null;
+                    }
+                },
+                ensureHost() {
+                    if (this.shareHost) {
+                        return;
+                    }
+                    const host = document.createElement('div');
+                    host.className = 'xqvideo-share-host';
+                    // 同页多实例时 id 要唯一，否则第二个实例会抢到第一个的宿主
+                    host.id = 'xqvideo-share-' + (shareSeq += 1);
+                    document.body.appendChild(host);
+                    this.shareHost = host;
+                },
+                disposeShare() {
+                    if (this.shareWidget && typeof this.shareWidget.destroy === 'function') {
+                        this.shareWidget.destroy();
+                    }
+                    if (this.shareHost && this.shareHost.parentNode) {
+                        this.shareHost.parentNode.removeChild(this.shareHost);
+                    }
+                    this.shareWidget = null;
+                    this.shareHost = null;
+                },
+            },
+            render() {
+                return null;
+            },
+        };
+    }
+
+    /**
+     * 取分享组件，优先级：
+     *   1. `share-resolver` 传入的组件（打包场景：`import { component } from 'xqshare/vue'`）
+     *   2. `window.XqShare`（引了 xqshare 的 UMD 产物）—— 包一层当组件用
+     *   3. 空壳
+     */
+    function resolveShareComponent(resolver) {
+        if (typeof resolver === 'function') {
+            const custom = resolver();
+            if (custom) {
+                return custom;
+            }
+        }
+        const Ctor = typeof window !== 'undefined' ? window.XqShare : null;
+        if (typeof Ctor === 'function') {
+            return createShareComponent(Ctor);
+        }
+        return XQ_SHARE_STUB;
+    }
 
     export default {
         name: 'xqvideo',
@@ -274,6 +382,8 @@
                     show: false,
                     type: 'pop',
                 },
+                // xqshare 可能是异步（CDN/UMD）加载的，点分享时自增一次让 shareComponent 重算
+                shareTick: 0,
             }
         },
         watch: {
@@ -303,18 +413,16 @@
             routeType() {
                 return this.$route && this.$route.query ? this.$route.query.type : undefined;
             },
-            // xqshare 降级为「运行时可选」：优先用宿主演进来的组件，
-            // 其次用全局 XqShare（CDN 引入），都没有时用一个空壳，避免解析失败整页崩。
+            // xqshare 三条路：宿主传入的组件 > window.XqShare（UMD 产物）> 空壳。
             shareComponent() {
-                if (this.shareResolver) {
-                    return this.shareResolver;
-                }
-                const globalShare =
-                    typeof window !== 'undefined' && window.XqShare ? window.XqShare : null;
-                return globalShare || XQ_SHARE_STUB;
+                void this.shareTick;
+                return resolveShareComponent(this.shareResolver);
             },
             hasShare() {
-                return Boolean(this.shareResolver || (typeof window !== 'undefined' && window.XqShare));
+                void this.shareTick;
+                return Boolean(
+                    this.shareResolver || (typeof window !== 'undefined' && window.XqShare)
+                );
             },
         },
         components: {
@@ -358,6 +466,8 @@
             // 显示分享
             toggleShare () {
                 if (!this.videoInfo.url) return;
+                // 每次点击都重新解析一次：xqshare 可能刚被异步加载进来
+                this.shareTick += 1;
                 if (!this.hasShare) {
                     this.setStatus('分享组件未加载');
                     return;
