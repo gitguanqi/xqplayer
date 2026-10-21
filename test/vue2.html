@@ -39,6 +39,7 @@
     <div class="report" data-xq-report></div>
 
     <script src="demo/check.js"></script>
+    <script src="demo/load-xqshare.js"></script>
     <script src="demo/load-sfc.js"></script>
     <script>
         XqSfcRunner({
@@ -104,6 +105,30 @@
                 XQCheck.assert('teardown 后第一个实例不受影响', function () {
                     if (!first.$el || !first.$el.querySelector('video')) throw new Error('第一个实例被误伤');
                 });
+
+                // 加载 xqshare 后点分享，应当真的弹出弹层
+                XQCheck.after('分享组件可用', XqLoadShare(), function () {
+                    if (!window.XqShare) throw new Error(window.__xqShareError || '未取到 XqShare');
+                });
+                XQCheck.after(
+                    '点击分享后弹层挂到 body',
+                    XqLoadShare(),
+                    function () {
+                        var shareBtn = first.$el.querySelector('[title="分享"]');
+                        if (!shareBtn) throw new Error('找不到分享按钮');
+                        shareBtn.click();
+                        return new Promise(function (resolve, reject) {
+                            setTimeout(function () {
+                                if (!document.querySelector('body > .xqvideo-share-host .xqshare')) {
+                                    reject(new Error('没有渲染出分享弹层'));
+                                    return;
+                                }
+                                shareBtn.click();
+                                resolve();
+                            }, 80);
+                        });
+                    }
+                );
             },
         });
     </script>

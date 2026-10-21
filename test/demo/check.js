@@ -80,6 +80,27 @@
         push('SKIP', name, reason);
     }
 
+    /**
+     * 异步断言：等 promise 落定后再用 fn 校验结果。
+     * 用于「加载外部依赖」「点击后等一帧」这类不能同步判定的场景。
+     */
+    function assertAfter(name, promise, fn) {
+        return Promise.resolve(promise).then(
+            function (value) {
+                try {
+                    var maybe = fn(value);
+                    if (maybe === false) throw new Error('断言为 false');
+                    push('PASS', name);
+                } catch (error) {
+                    push('FAIL', name, (error && error.message) || String(error));
+                }
+            },
+            function (error) {
+                push('FAIL', name, (error && error.message) || String(error));
+            }
+        );
+    }
+
     function assertEqual(name, actual, expected) {
         assert(name, function () {
             if (actual !== expected) {
@@ -96,5 +117,11 @@
         push('FAIL', '未处理的 Promise 拒绝', String(event.reason));
     });
 
-    window.XQCheck = { assert: assert, skip: skip, equal: assertEqual, results: results };
+    window.XQCheck = {
+        assert: assert,
+        skip: skip,
+        equal: assertEqual,
+        after: assertAfter,
+        results: results,
+    };
 })();

@@ -39,6 +39,7 @@
     <div class="report" data-xq-report></div>
 
     <script src="demo/check.js"></script>
+    <script src="demo/load-xqshare.js"></script>
     <script src="demo/load-sfc.js"></script>
     <script>
         XqSfcRunner({
@@ -84,11 +85,35 @@
                     if (legacy) throw new Error('还存在旧的 xqvideo-* 图标类');
                 });
                 XQCheck.assert('share 缺依赖时不报错', function () {
-                    // xqshare 没装，点分享应当走提示而不是抛异常
+                    // 没加载 xqshare 时点分享应当走提示而不是抛异常
                     var shareBtn = document.querySelector('#app [title="分享"]');
                     if (!shareBtn) throw new Error('找不到分享按钮');
                     shareBtn.click();
                 });
+
+                // 加载 xqshare 后点分享，应当真的弹出弹层
+                XQCheck.after('分享组件可用', XqLoadShare(), function () {
+                    if (!window.XqShare) throw new Error(window.__xqShareError || '未取到 XqShare');
+                });
+                XQCheck.after(
+                    '点击分享后弹层挂到 body',
+                    XqLoadShare(),
+                    function () {
+                        var shareBtn = document.querySelector('#app [title="分享"]');
+                        shareBtn.click();
+                        return new Promise(function (resolve, reject) {
+                            setTimeout(function () {
+                                if (!document.querySelector('body > .xqvideo-share-host .xqshare')) {
+                                    reject(new Error('没有渲染出分享弹层'));
+                                    return;
+                                }
+                                // 验完就收起来，页面留给播放器本身
+                                shareBtn.click();
+                                resolve();
+                            }, 80);
+                        });
+                    }
+                );
 
                 // 卸载验证用一次性探针应用，主应用保留在页面上展示完整效果
                 var probeApp = Vue.createApp({
