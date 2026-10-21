@@ -18,6 +18,10 @@ export const DEFAULTS = {
     mode: 'mp4',
     width: 1200,
     height: 600,
+    /** 分享标题，缺省用 document.title */
+    title: '',
+    /** xqshare 构造器（打包场景传入），缺省用 XQVideoPlayer.useShare() 或 window.XqShare */
+    share: null,
 };
 
 /** 日志前缀，便于在控制台里区分来源 */

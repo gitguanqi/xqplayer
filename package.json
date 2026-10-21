@@ -81,5 +81,8 @@
     "homepage": "https://github.com/gitguanqi/xqplayer#readme",
     "devDependencies": {
         "esbuild": "^0.28.2"
+    },
+    "dependencies": {
+        "xqshare": "^0.1.0"
     }
 }

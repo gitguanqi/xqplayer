@@ -66,6 +66,7 @@ export function XQVideoPlayer(option) {
     this._listeners = [];
     this._statusTimer = 0;
     this._mediaHandle = null;
+    this._share = null;
     this._destroyed = false;
     this._warned = Object.create(null);
     this.video = createInitialState(options);
@@ -715,11 +716,23 @@ XQVideoPlayer.prototype.shareVideo = function () {
         return null;
     }
     const selector = '#' + (host.id || this.uid + '-share-pop');
-    const instance = openShare(selector);
+    // 已经打开过就只切换显隐，避免每次点击都 new 一个实例
+    if (this._share) {
+        this._share.toggle();
+        return this._share;
+    }
+    const instance = openShare({
+        selector: selector,
+        url: this.video.about.url || undefined,
+        title: this.options.title || undefined,
+        share: this.options.share,
+    });
     if (!instance) {
         this.warn('未检测到 xqshare，分享按钮已降级');
         this.setStatus('分享组件未加载');
+        return null;
     }
+    this._share = instance;
     return instance;
 };
 
@@ -868,6 +881,14 @@ XQVideoPlayer.prototype.destroy = function () {
             /* 销毁失败不应阻断后续清理 */
         }
         this._mediaHandle = null;
+    }
+    if (this._share && typeof this._share.destroy === 'function') {
+        try {
+            this._share.destroy();
+        } catch (err) {
+            /* 同上 */
+        }
+        this._share = null;
     }
 
     offAll(this._listeners);

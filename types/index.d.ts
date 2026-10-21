@@ -17,6 +17,33 @@ export interface XQPlayerOptions {
     width?: number | string;
     /** 高度，默认 600 */
     height?: number | string;
+    /** 分享标题，缺省用 document.title */
+    title?: string;
+    /** 分享组件构造器（xqshare），缺省用 useShare() 注册的或全局 window.XqShare */
+    share?: XQShareCtor | null;
+}
+
+/**
+ * xqshare 的构造器形状。
+ * 不直接 `import type { XqShare } from 'xqshare'`，避免没装 xqshare 时类型解析失败。
+ */
+export interface XQShareCtor {
+    new (options: {
+        el: string | HTMLElement;
+        type?: 'default' | 'pop' | 'slide';
+        url?: string;
+        title?: string;
+        [key: string]: unknown;
+    }): XQShareInstance;
+}
+
+export interface XQShareInstance {
+    show?(): unknown;
+    hide?(): unknown;
+    toggle?(): unknown;
+    setUrl?(url: string, title?: string): unknown;
+    destroy?(): void;
+    [key: string]: unknown;
 }
 
 export interface XQBarrageInput {
@@ -105,6 +132,12 @@ export class XQVideoPlayer {
 
     static version: string;
     static isSupportedMode(mode: string): boolean;
+    /**
+     * 注入 xqshare 构造器，供打包场景使用：
+     * `import XqShare from 'xqshare'; XQVideoPlayer.useShare(XqShare);`
+     * 传 null 取消注册。
+     */
+    static useShare(ctor: XQShareCtor | null): XQShareCtor | null;
 
     /** 切换播放/暂停 */
     playVideo(): void;
@@ -161,9 +194,10 @@ export class XQVideoPlayer {
     /** 兼容旧版：按 id 在实例内取节点 */
     gid(id: string): HTMLElement | null;
 
-    /** 移除 DOM、摘掉所有监听器并销毁 hls/flv 实例 */
+    /** 移除 DOM、摘掉所有监听器并销毁 hls/flv、分享实例 */
     destroy(): void;
 }
 
 export const VERSION: string;
+export function useShare(ctor: XQShareCtor | null): XQShareCtor | null;
 export default XQVideoPlayer;
