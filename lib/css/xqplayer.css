@@ -126,6 +126,49 @@
   border: none;
 }
 
+/* 窄播放器：按实例宽度逐级收起次要控件（媒体查询只能看视口，管不了固定宽度的实例） */
+.xqvideo-box.xq-narrow .video-info-box .video-control .video-control-btn .mobile-no,
+.xqvideo-box.xq-compact .video-info-box .video-control .video-control-btn .mobile-no {
+  display: none;
+}
+
+.xqvideo-box.xq-compact .video-control .video-control-barrage {
+  padding-left: 12px;
+  padding-right: 4px;
+}
+
+.xqvideo-box.xq-compact .video-control .video-control-barrage input {
+  display: none;
+}
+
+/* 组件自成一体：不依赖宿主页面的 reset（box-sizing 与按钮外观） */
+.xqvideo-box,
+.xqvideo-box *,
+.xqvideo-box *::before,
+.xqvideo-box *::after {
+  box-sizing: border-box;
+}
+
+.xqvideo-box button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  appearance: none;
+}
+
+.xqvideo-box a {
+  text-decoration: none;
+}
+
+.xqvideo-box input {
+  font: inherit;
+  outline: none;
+  border: 0;
+}
+
 .xqvideo-box .hide {
   display: none !important;
 }
@@ -368,11 +411,18 @@
 .xqvideo-box .video-info-box .video-control .video-control-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
 }
 
 .xqvideo-box .video-info-box .video-control .video-control-barrage {
   position: relative;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
   padding-left: 30px;
   padding-right: 10px;
   width: auto;
@@ -382,10 +432,11 @@
 
 .xqvideo-box .video-info-box .video-control .video-control-barrage .switch {
   display: inline-block;
-  padding: 4px;
-  width: 15px;
-  height: 15px;
-  line-height: 15px;
+  flex: 0 0 auto;
+  padding: 0;
+  width: 25px;
+  height: 25px;
+  line-height: 23px;
   cursor: pointer;
   color: #f8f8f8;
   text-align: center;
@@ -402,9 +453,11 @@
 
 .xqvideo-box .video-info-box .video-control .video-control-barrage input {
   box-sizing: border-box;
-  margin-left: 10px;
+  flex: 1 1 120px;
+  min-width: 70px;
+  width: auto;
+  margin-left: 8px;
   padding-left: 10px;
-  width: 200px;
   height: 25px;
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
@@ -416,11 +469,11 @@
 
 .xqvideo-box .video-info-box .video-control .video-control-barrage .send {
   position: relative;
-  left: -5px;
-  top: 1px;
+  flex: 0 0 auto;
+  margin-left: 2px;
   width: 50px;
   height: 25px;
-  line-height: 20px;
+  line-height: 25px;
   font-size: 14px;
   color: #f8f8f8;
   background: rgba(255, 255, 255, 0.2);
@@ -446,11 +499,21 @@
   margin-top: 3px;
   padding: 0 5px;
   height: 42px;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+.xqvideo-box .video-info-box .video-control .video-control-left {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .xqvideo-box .video-info-box .video-control .video-control-btn button,
 .xqvideo-box .video-info-box .video-control .video-control-btn a {
   display: inline-block;
+  flex: 0 0 auto;
   width: 35px;
   height: 30px;
   line-height: 30px;
@@ -484,16 +547,22 @@
   margin-left: 5px;
   color: #ccc;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .xqvideo-box .video-info-box .video-control .video-control-btn .video-control-alone {
-  display: inline-block;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
 }
 
 .xqvideo-box .video-info-box .video-control .video-control-btn .video-control-speed {
   position: absolute;
-  bottom: 45px;
-  right: 200px;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
   box-sizing: border-box;
   padding: 10px;
   width: 70px;
@@ -503,7 +572,7 @@
   font-size: 14px;
   line-height: 1.8;
   text-align: center;
-  z-index: 2;
+  z-index: 9;
 }
 
 .xqvideo-box .video-info-box .video-control .video-control-btn .video-control-speed span {
@@ -518,14 +587,12 @@
   color: #d32d2d;
 }
 
-.xqvideo-box .video-info-box .video-control .video-control-btn .video-control-speed.qua {
-  right: 245px;
-}
-
 .xqvideo-box .video-info-box .video-control .video-control-btn .video-control-set {
   position: absolute;
-  bottom: 45px;
-  right: 145px;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
   box-sizing: border-box;
   padding: 10px;
   width: auto;
@@ -534,7 +601,8 @@
   color: #fff;
   font-size: 12px;
   border-radius: 5px;
-  z-index: 2;
+  white-space: nowrap;
+  z-index: 9;
 }
 
 .xqvideo-box .video-info-box .video-control .video-control-btn .video-control-set p {
@@ -580,8 +648,10 @@
 
 .xqvideo-box .video-info-box .video-control .video-control-btn .video-control-volum {
   position: absolute;
-  right: 150px;
-  bottom: 40px;
+  left: 50%;
+  right: auto;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -589,6 +659,7 @@
   height: 100px;
   background: rgba(0, 0, 0, 0.7);
   border-radius: 5px;
+  z-index: 9;
 }
 
 .xqvideo-box .video-info-box .video-control .video-control-btn .video-control-volum span {
@@ -745,34 +816,28 @@
 }
 
 @media all and (max-width: 768px) {
-  .video-info {
-    padding: 0;
-    border-top: 1px solid #ccc;
-    flex-direction: column;
-  }
-
-  .video-info .video-info-box {
+  .xqvideo-box .video-info-box {
     height: 210px;
   }
 
-  .video-info .video-info-box .xqvideo-video-status {
+  .xqvideo-box .video-info-box .xqvideo-video-status {
     bottom: 50px;
   }
 
-  .video-info .video-info-box .video-control {
+  .xqvideo-box .video-info-box .video-control {
     height: 40px;
   }
 
-  .video-info .video-info-box .video-control .video-control-bar {
+  .xqvideo-box .video-info-box .video-control .video-control-bar {
     height: 3px;
   }
 
-  .video-info .video-info-box .video-control .video-control-btn {
+  .xqvideo-box .video-info-box .video-control .video-control-btn {
     margin-top: 0;
     height: 35px;
   }
 
-  .video-info .video-info-box .video-control .video-control-btn .mobile-play {
+  .xqvideo-box .video-info-box .video-control .video-control-btn .mobile-play {
     position: absolute;
     top: -165%;
     left: 50%;
@@ -780,5 +845,14 @@
     margin-left: -15px;
     font-size: 30px;
     color: #fff;
+  }
+
+  /* 小屏收起清晰度/倍速，保证弹幕行不换行 */
+  .xqvideo-box .video-info-box .video-control .mobile-no {
+    display: none;
+  }
+
+  .xqvideo-box .video-info-box .video-control .video-control-barrage input {
+    min-width: 60px;
   }
 }

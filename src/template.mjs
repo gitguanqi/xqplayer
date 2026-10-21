@@ -16,7 +16,10 @@ export function buildTemplate(data) {
     const pageUrl = escapeHtml(data.pageUrl);
     const version = escapeHtml(data.version);
 
-    return `<div class="xqvideo-box" style="width: ${width}px; height: ${height}px">
+    // 控制条内容比视频宽度更宽时按档位收起次要控件，避免图标被挤出/互相覆盖
+    const sizeClass = width < 520 ? ' xq-compact' : width < 680 ? ' xq-narrow' : '';
+
+    return `<div class="xqvideo-box${sizeClass}" style="width: ${width}px; height: ${height}px">
             <div class="video-info-box" data-xq="box">
                 <video tabindex="-1" data-xq="video" preload="auto"></video>
                 <div class="video-loading" data-xq="loading">
