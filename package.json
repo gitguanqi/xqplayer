@@ -1,6 +1,6 @@
 {
   "name": "xqplayer",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A simple, friendly HTML5 video player (UMD + ESM + Vue 2/3) with HLS/FLV and bullet-screen support.",
   "main": "lib/js/xqplayer.js",
   "module": "lib/js/xqplayer-esm.mjs",
@@ -8,6 +8,8 @@
   "unpkg": "lib/js/xqplayer.min.js",
   "jsdelivr": "lib/js/xqplayer.min.js",
   "types": "types/index.d.ts",
+  "llms": "./llms.txt",
+  "agents": "./skills/xqplayer-integration/SKILL.md",
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
@@ -33,6 +35,8 @@
     "lib/fonts",
     "lib/vue",
     "types",
+    "llms.txt",
+    "skills",
     "README.md",
     "zh.md",
     "CHANGELOG.md",
@@ -55,7 +59,9 @@
     "serve": "node scripts/serve.mjs",
     "test:browser": "node scripts/serve.mjs",
     "prepublishOnly": "npm run build && npm test",
-    "release": "node scripts/release.mjs"
+    "release": "node scripts/release.mjs",
+    "commitlint": "commitlint --edit",
+    "prepare": "husky"
   },
   "engines": {
     "node": ">=18.17"
@@ -80,7 +86,11 @@
   },
   "homepage": "https://github.com/gitguanqi/xqplayer#readme",
   "devDependencies": {
-    "esbuild": "^0.28.2"
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "esbuild": "^0.28.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2"
   },
   "dependencies": {
     "xqshare": "^0.1.2"

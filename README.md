@@ -178,12 +178,24 @@ instance are all released. Call it before you remove the container in an SPA.
 - Bullet-screen content is escaped instead of injected as raw HTML.
 - HLS / FLV / share libraries are probed at runtime instead of being referenced directly.
 
+## For AI agents
+
+The published package ships agent-facing metadata, declared in `package.json` and included in the tarball:
+
+- `llms` → `llms.txt` — compact API reference: exports, options with real defaults, instance methods,
+  optional-dependency behaviour and integration constraints.
+- `agents` → `skills/xqplayer-integration/SKILL.md` — integration guide: which entry to pick, wiring order,
+  teardown, and how to verify an integration. Exact tables live in
+  `skills/xqplayer-integration/references/api.md`, runnable examples in `references/examples.md`.
+
+Both are readable straight from `node_modules/xqplayer/`, so no network fetch is needed.
+
 ## Development
 
 ```sh
 npm run build          # regenerate lib/ artifacts from src/
 npm run check          # fail if lib/ artifacts are out of sync with src/
-npm test               # node:test unit suite (59 assertions)
+npm test               # node:test unit suite (72 assertions)
 npm run test:harness   # behavioural regression against a stub DOM
 npm run serve          # serve test/ pages at http://localhost:5173
 npm run release patch  # version bump + build + test + tag + push (no force push)

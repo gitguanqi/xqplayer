@@ -1,0 +1,127 @@
+# xqplayer
+
+Browser-only HTML5 video player for `mp4` / `m3u8` (HLS) / `flv`, shipped as UMD + ESM + a Vue 2/3 plugin.
+Zero runtime dependencies: `hls.js`, `flv.js` and `xqshare` are optional globals detected at runtime.
+
+## Install
+
+```sh
+npm i xqplayer
+```
+
+## Imports
+
+```js
+import XQVideoPlayer from 'xqplayer';                          // default export = constructor
+import { XQVideoPlayer as Ctor, VERSION, useShare } from 'xqplayer';
+import 'xqplayer/css/xqplayer.css';                            // required for the default skin
+
+import xqVideo from 'xqplayer/vue';                            // Vue 2/3 plugin (SFC, see Constraints)
+```
+
+UMD: `<script src="https://unpkg.com/xqplayer/lib/js/xqplayer.min.js">` exposes `window.XQVideoPlayer`.
+
+## Exported API
+
+- `XQVideoPlayer(options: XQPlayerOptions)` — the player. Constructor works with or without `new`.
+- `VERSION: string` — package version, same value as `XQVideoPlayer.version`.
+- `useShare(ctor: XQShareCtor | null): XQShareCtor | null` — register an `xqshare` constructor once; also
+  available as static `XQVideoPlayer.useShare(ctor)`.
+- `XQVideoPlayer.isSupportedMode(mode: string): boolean` — `true` for `mp4` / `m3u8` / `flv`.
+- `xqVideo` (default of `xqplayer/vue`) — Vue plugin with `install()`; `componentName` is `xqVideo`.
+- Types (see `types/index.d.ts`): `XQPlayerOptions`, `XQPlayerState`, `XQBarrageInput`, `XQBarrage`,
+  `XQShareCtor`, `XQShareInstance`.
+
+## Key Options
+
+- `el` — **required**. CSS selector or `HTMLElement`. Missing/unmatched target throws.
+- `url` — **required**. Video source URL.
+- `mode` — `'mp4' | 'm3u8' | 'flv'`, default `'mp4'`. **Not inferred from the URL**: set it explicitly
+  for HLS/FLV or the file is fed to the native `<video>` element as mp4.
+- `poster` — default `''`. Optional cover image.
+- `barrages` — default `[]`. Bullet-screen items `{ content, name, avatar }`, rendered into the panel as-is.
+  `time` is accepted but never used for scheduling.
+- `width` — `number | string`, default `1200`. Written as the root width.
+- `height` — `number | string`, default `600`. Written as the root height. The control bar drops menus
+  below 680px and the bullet-screen input below 520px.
+- `title` — default `''`. Share title, falls back to `document.title`.
+- `share` — default `null`. Per-instance `xqshare` constructor.
+
+## Instance API
+
+Playback and source:
+
+- `playVideo()` — toggles play/pause (does not force play).
+- `setVolume(ratio)` / `setVolumeRatio(ratio)` — `0`–`1`.
+- `setSpeed(rate)`, `setProgressRatio(ratio)`, `videoMuted()`.
+- `reload()` — reloads the current source from `player.options` (error-retry path).
+- `loadVideo({ video, type, url, poster })` — low-level loader; see Constraints.
+- `setStatus(text)` — transient hint, auto-hides after ~1s.
+- `setLoading(bool)`, `setError(msg)`, `clearError()`.
+- `fullScreenOpen()`, `fullScreenCancel()`.
+
+Bullet-screen and share:
+
+- `sendBarrage()` — reads the built-in input, appends the item and re-renders. Returns the item, or `null`
+  when the input is empty. Arguments are ignored.
+- `showBarrage()` — re-renders `player.video.barrageList`. Assign that array to replace the list.
+- `shareVideo()` — opens the share popup, returns the `xqshare` instance or `null`.
+
+Lifecycle and helpers:
+
+- `destroy()` — removes the DOM node, detaches every listener, destroys hls/flv and the share widget.
+  Idempotent.
+- `secondToTime(seconds)` → `'01:01:01'`.
+- `q(name)` / `qa(name)` / `dom(name)` / `domAll(name)` / `gid(id)` — scoped DOM lookup inside this instance.
+- `toggleControl()`, `toggleInfo()`, `toggleQualBar()`, `toggleSpeed()`, `toggleSet()`, `toggleVol()`,
+  `toggleBarrage()`, `addDraw()`, `hideDraw()`, `syncTimeDom()`, `syncProgressDom()`, `syncPlayState()`.
+
+Readable state snapshot: `instance.video` (see `XQPlayerState`). Note `video.vol` is `0`–`100` while
+`setVolume()` takes `0`–`1`.
+
+## Typical Use
+
+```js
+import XQVideoPlayer from 'xqplayer';
+import 'xqplayer/css/xqplayer.css';
+
+const player = new XQVideoPlayer({
+    el: '#myPlayer',
+    url: './movie.mp4',
+    poster: './poster.jpg',
+    mode: 'mp4',
+    width: 720,
+    height: 405,
+    barrages: [{ content: 'hello', name: 'guest' }],
+});
+
+player.playVideo();
+// SPA teardown before removing the container:
+player.destroy();
+```
+
+HLS needs `window.Hls` to exist before the instance is created:
+
+```js
+import Hls from 'hls.js';
+window.Hls = Hls;
+new XQVideoPlayer({ el: '#myPlayer', url: './stream.m3u8', mode: 'm3u8' });
+```
+
+## Constraints
+
+- Browser only. Constructing without `document` throws `[xqplayer] 需要在浏览器环境中使用`.
+  Validation errors are thrown as `Error` with the `[xqplayer] ` prefix.
+- Import the stylesheet yourself. Without `xqplayer/css/xqplayer.css` the icon font and control-bar layout
+  are unstyled. `xqplayer/css/xqplayer-icon.css` ships the icon font only.
+- Optional libraries are probed at runtime, never bundled: `window.Hls` (m3u8), `window.flvjs` (flv),
+  `window.XqShare` or `useShare()` / `options.share` (share). A missing one degrades that single feature
+  (error state or a "分享组件未加载" toast) instead of throwing.
+- `mode` is not sniffed from the file extension — see Key Options.
+- `loadVideo()` expects the internal shape `{ video, type, url, poster }`. Passing only `{ url }` does not
+  switch the source. To change source reliably, mutate `player.options.url` / `player.options.mode` and call
+  `reload()`, or create a new instance.
+- Call `destroy()` before removing the container in a SPA; multiple instances on one page are isolated.
+- `xqplayer/vue` is a `.vue` SFC: the host build needs `vue-loader` / `@vitejs/plugin-vue` plus a `less`
+  compiler (the scoped style block is `lang="less"`), and still imports `xqplayer/css/xqplayer.css`.
+- The root entry `xqplayer` is the player itself, not the Vue plugin (changed in 0.1.0).

@@ -175,12 +175,24 @@ player.destroy();            // 移除 DOM、摘掉监听、销毁 hls/flv 与�
 - HLS / FLV / 分享库改为运行时探测，缺失不再中断实例初始化。
 - `secondToTime(10)` 修正为 `00:00:10`（旧实现输出 `010`）；拖拽的 clamp 与坐标参考系也已修正。
 
+## 给 AI 助手
+
+发布包里带了给 AI 用的元数据，在 `package.json` 里声明，并一起打进 npm 包：
+
+- `llms` → `llms.txt`：精简的 API 说明 —— 导出面、参数与真实默认值、实例方法、
+  可选依赖的降级行为、接入限制。
+- `agents` → `skills/xqplayer-integration/SKILL.md`：接入指南 —— 先选哪个入口、接线顺序、
+  销毁时机、怎么自检。精确的表格在 `skills/xqplayer-integration/references/api.md`，
+  可直接运行的示例在 `references/examples.md`。
+
+两个文件都能直接从 `node_modules/xqplayer/` 读到，不依赖联网。
+
 ## 开发
 
 ```sh
 npm run build          # 由 src/ 重新生成 lib/ 下的产物
 npm run check          # 产物与源码不一致时报错退出
-npm test               # node:test 单元测试（59 条断言）
+npm test               # node:test 单元测试（72 条断言）
 npm run test:harness   # 基于桩 DOM 的行为回归
 npm run serve          # 启动测试页 http://localhost:5173
 npm run release patch  # 升版本 + 构建 + 测试 + 打 tag + 推送（不使用强推）

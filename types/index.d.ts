@@ -11,7 +11,7 @@ export interface XQPlayerOptions {
     poster?: string;
     /** 初始弹幕列表 */
     barrages?: XQBarrageInput[];
-    /** 播放类型，缺省按后缀推断 */
+    /** 播放类型，默认 'mp4'；不会按 url 后缀推断，m3u8 / flv 必须显式指定 */
     mode?: 'mp4' | 'm3u8' | 'flv';
     /** 宽度，默认 1200 */
     width?: number | string;
@@ -53,7 +53,7 @@ export interface XQBarrageInput {
     name?: string;
     /** 头像地址 */
     avatar?: string;
-    /** 出现时间（秒） */
+    /** 出现时间（秒）；当前渲染不按时间调度，该字段仅做保留 */
     time?: number | string;
     [key: string]: unknown;
 }
@@ -172,7 +172,9 @@ export class XQVideoPlayer {
     addDraw(): void;
     hideDraw(): void;
 
+    /** 从内置弹幕输入框读取内容并发送（参数仅为兼容保留，实际以输入框为准） */
     sendBarrage(content?: string): void;
+    /** 重新渲染 video.barrageList（参数仅为兼容保留，要换列表请直接改 video.barrageList） */
     showBarrage(list?: XQBarrageInput[]): void;
     shareVideo(): void;
 

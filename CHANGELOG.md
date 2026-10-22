@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.2.0
+
+### 新增
+
+- **给 AI 用的包元数据**：新增 `llms.txt`（精简 API 说明）与 `skills/xqplayer-integration/`
+  （接入技能 + `references/api.md`、`references/examples.md`），并在 `package.json` 里以
+  `llms` / `agents` 声明，两者都加入了 `files` 白名单，会随包发布。运行时代码、入口与
+  类型签名均未改动。
+- `test/unit/agent-metadata.test.mjs`：守住元数据与真实导出面的一致性 —— 声明的文件存在且会被
+  打包、`llms.txt` 覆盖全部导出/参数/方法与真实默认值、子路径导入能在 `exports` 里解析、
+  技能 frontmatter 与 references 链接可用。断言数从 61 增至 72。
+
+### 文档
+
+- `types/index.d.ts` 的注释纠偏（不影响类型）：`mode` 默认 `'mp4'` 且**不按后缀推断**；
+  `barrages[].time` 当前不参与调度；`sendBarrage` / `showBarrage` 的入参仅为兼容保留。
+
+### 开发
+
+- 提交规范工具链：接入 commitlint（`@commitlint/config-conventional` + 显式 `type-enum`）、
+  Husky 9 钩子（`commit-msg` 校验提交信息，`pre-commit` 跑 lint-staged）与 lint-staged 15。
+  `devDependencies` 固定在兼容 `engines.node >= 18.17` 的版本线（commitlint 19.x / lint-staged 15.x），
+  `prepare: husky` 让 `npm install` 后自动注册钩子。仅影响贡献流程，不改变产物与运行时。
+
 ## 0.1.2
 
 ### 修复
